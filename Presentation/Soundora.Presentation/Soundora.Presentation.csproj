@@ -30,6 +30,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.30">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Core\Soundora.Application\Soundora.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Soundora.Infrastructure\Soundora.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Soundora.Persistence\Soundora.Persistence.csproj" />
