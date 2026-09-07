@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Soundora.Application.Authentication.Abstractions;
 using Soundora.Persistence.Contexts;
 using Soundora.Persistence.Identity;
 using Soundora.Persistence.Seeds;
+using Soundora.Persistence.Services;
 
 namespace Soundora.Persistence;
 
@@ -44,7 +46,8 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddScoped<DataSeeder>();
-
+        services.AddScoped<DataSeeder>();
+        services.AddScoped<IIdentityService, IdentityService>();
         return services;
     }
 }
