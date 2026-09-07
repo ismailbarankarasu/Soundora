@@ -1,0 +1,116 @@
+﻿@model Soundora.Application.Authentication.Models.RegisterRequest
+
+@{
+    ViewData["Title"] = "Kayıt Ol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            @if (TempData["SuccessMessage"] is string message)
+            {
+                <div class="alert alert-success" role="alert">
+                    @message
+                </div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-2">Soundora'ya Katıl</h2>
+
+                    <p class="text-muted text-center mb-4">
+                        Müzik ve podcast dünyasını keşfetmek için
+                        hesabını oluştur.
+                    </p>
+
+                    <form asp-controller="Account"
+                          asp-action="Register"
+                          method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name"
+                                   class="form-label">Ad</label>
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   autocomplete="given-name" />
+                            <span asp-validation-for="Name"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Surname"
+                                   class="form-label">Soyad</label>
+                            <input asp-for="Surname"
+                                   class="form-control"
+                                   autocomplete="family-name" />
+                            <span asp-validation-for="Surname"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UserName"
+                                   class="form-label">Kullanıcı Adı</label>
+                            <input asp-for="UserName"
+                                   class="form-control"
+                                   autocomplete="username" />
+                            <span asp-validation-for="UserName"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email"
+                                   class="form-label">E-posta</label>
+                            <input asp-for="Email"
+                                   type="email"
+                                   class="form-control"
+                                   autocomplete="email" />
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password"
+                                   class="form-label">Şifre</label>
+                            <input asp-for="Password"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password" />
+                            <div class="form-text">
+                                En az 6 karakter, büyük harf,
+                                küçük harf ve rakam içermelidir.
+                            </div>
+                            <span asp-validation-for="Password"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword"
+                                   class="form-label">Şifre Tekrarı</label>
+                            <input asp-for="ConfirmPassword"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password" />
+                            <span asp-validation-for="ConfirmPassword"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-dark w-100">
+                            Kayıt Ol
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
