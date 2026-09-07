@@ -1,0 +1,85 @@
+﻿@model Soundora.Application.Authentication.Models.LoginRequest
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+
+            @if (TempData["SuccessMessage"] is string message)
+            {
+                <div class="alert alert-success">
+                    @message
+                </div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">
+                        Soundora'ya Giriş Yap
+                    </h2>
+
+                    <form asp-controller="Account"
+                          asp-action="Login"
+                          asp-route-returnUrl="@returnUrl"
+                          method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UserName"
+                                   class="form-label">
+                                Kullanıcı Adı
+                            </label>
+
+                            <input asp-for="UserName"
+                                   class="form-control"
+                                   autocomplete="username" />
+
+                            <span asp-validation-for="UserName"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password"
+                                   class="form-label">
+                                Şifre
+                            </label>
+
+                            <input asp-for="Password"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="current-password" />
+
+                            <span asp-validation-for="Password"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-dark w-100">
+                            Giriş Yap
+                        </button>
+
+                        <p class="text-center mt-3 mb-0">
+                            Hesabın yok mu?
+                            <a asp-controller="Account"
+                               asp-action="Register">
+                                Kayıt ol
+                            </a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

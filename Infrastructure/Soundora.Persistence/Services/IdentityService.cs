@@ -12,13 +12,54 @@ public sealed class IdentityService : IIdentityService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly AppDbContext _context;
+    private readonly SignInManager<AppUser> _signInManager;
 
     public IdentityService(
         UserManager<AppUser> userManager,
-        AppDbContext context)
+        AppDbContext context,
+        SignInManager<AppUser> signInManager)
     {
         _userManager = userManager;
         _context = context;
+        _signInManager = signInManager;
+    }
+
+    public async Task<LoginResult> LoginAsync(LoginRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserName) ||
+            string.IsNullOrWhiteSpace(request.Password))
+        {
+            return new LoginResult
+            {
+                Error = "Kullanıcı adı ve şifre zorunludur."
+            };
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(
+            request.UserName.Trim(),
+            request.Password,
+            isPersistent: false,
+            lockoutOnFailure: true);
+
+        if (result.Succeeded)
+        {
+            return new LoginResult
+            {
+                Succeeded = true
+            };
+        }
+
+        return new LoginResult
+        {
+            Error = result.IsLockedOut
+                ? "Çok fazla başarısız giriş yapıldı. 5 dakika sonra tekrar deneyin."
+                : "Kullanıcı adı veya şifre hatalıdır."
+        };
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _signInManager.SignOutAsync();
     }
 
     public async Task<RegisterResult> RegisterAsync(

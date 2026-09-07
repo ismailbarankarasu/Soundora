@@ -16,6 +16,46 @@ public sealed class AccountController : Controller
 
     [AllowAnonymous]
     [HttpGet]
+    public IActionResult Login(string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+        return View(new LoginRequest());
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginRequest request, string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+
+        if (!ModelState.IsValid)
+        {
+            return View(request);
+        }
+
+        var result = await _identityService.LoginAsync(request);
+
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                result.Error ?? "Giriş yapılamadı.");
+
+            return View(request);
+        }
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) &&
+            Url.IsLocalUrl(returnUrl))
+        {
+            return LocalRedirect(returnUrl);
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
     public IActionResult Register()
     {
         return View(new RegisterRequest());
@@ -44,8 +84,26 @@ public sealed class AccountController : Controller
         }
 
         TempData["SuccessMessage"] =
-            "Kaydınız başarıyla oluşturuldu.";
+            "Kaydınız oluşturuldu. Şimdi giriş yapabilirsiniz.";
+        return RedirectToAction(nameof(Login));
+    }
 
-        return RedirectToAction(nameof(Register));
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await _identityService.LogoutAsync();
+
+        return RedirectToAction(nameof(Login));
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+
+        return View();
     }
 }

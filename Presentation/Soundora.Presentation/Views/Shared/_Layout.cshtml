@@ -32,6 +32,40 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <div class="d-flex justify-content-end align-items-center gap-2 my-3">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span>Hoş geldin, @User.Identity.Name</span>
+
+                    <form asp-area=""
+                          asp-controller="Account"
+                          asp-action="Logout"
+                          method="post"
+                          class="m-0">
+
+                        <button type="submit"
+                                class="btn btn-outline-danger">
+                            Çıkış Yap
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area=""
+                       asp-controller="Account"
+                       asp-action="Login"
+                       class="btn btn-outline-dark">
+                        Giriş Yap
+                    </a>
+
+                    <a asp-area=""
+                       asp-controller="Account"
+                       asp-action="Register"
+                       class="btn btn-dark">
+                        Kayıt Ol
+                    </a>
+                }
+            </div>
             @RenderBody()
         </main>
     </div>

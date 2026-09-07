@@ -13,6 +13,20 @@ var connectionString =
         "DefaultConnection bulunamadı.");
 builder.Services.AddPersistence(connectionString);
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "Soundora.Identity";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+
+    options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    options.SlidingExpiration = true;
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

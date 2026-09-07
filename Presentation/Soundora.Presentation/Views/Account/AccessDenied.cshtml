@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Erişim Reddedildi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="alert alert-danger mt-4">
+    <h2>Erişim Reddedildi</h2>
+    <p>Bu sayfayı görüntülemek için gerekli yetkiye sahip değilsiniz.</p>
+
+    <a asp-area=""
+       asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-dark">
+        Ana Sayfaya Dön
+    </a>
+</div>
