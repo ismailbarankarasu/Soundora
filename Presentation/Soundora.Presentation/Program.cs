@@ -1,9 +1,11 @@
 using Soundora.Persistence;
+using Soundora.Persistence.Seeds;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
 var connectionString =
     builder.Configuration.GetConnectionString(
         "DefaultConnection")
@@ -12,6 +14,14 @@ var connectionString =
 builder.Services.AddPersistence(connectionString);
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider
+        .GetRequiredService<DataSeeder>();
+
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

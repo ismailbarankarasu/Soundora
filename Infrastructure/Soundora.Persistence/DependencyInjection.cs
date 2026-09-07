@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Soundora.Persistence.Contexts;
 using Soundora.Persistence.Identity;
+using Soundora.Persistence.Seeds;
 
 namespace Soundora.Persistence;
 
@@ -41,6 +42,8 @@ public static class DependencyInjection
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddScoped<DataSeeder>();
 
         return services;
     }
