@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Soundora.Application\Soundora.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Soundora.Infrastructure\Soundora.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Soundora.Persistence\Soundora.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>
