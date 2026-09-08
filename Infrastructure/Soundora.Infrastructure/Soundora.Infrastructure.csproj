@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Core\Soundora.Application\Soundora.Application.csproj" />
     <ProjectReference Include="..\..\Core\Soundora.Domain\Soundora.Domain.csproj" />
   </ItemGroup>

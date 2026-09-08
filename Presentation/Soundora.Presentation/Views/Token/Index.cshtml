@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "JWT Kontrolü";
+    Layout = "~/Views/Shared/_UI_Layout.cshtml";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Soundora</p>
+        <h2>JWT Kontrolü</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+
+        <form id="tokenForm"
+              asp-area=""
+              asp-controller="Token"
+              asp-action="Create"
+              method="post">
+
+            <button id="testButton"
+                    type="submit"
+                    class="btn oneMusic-btn">
+                JWT Üret ve Doğrula
+            </button>
+        </form>
+
+        <div id="testResult"
+             class="mt-4"
+             role="status"
+             aria-live="polite">
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("tokenForm");
+            const button = document.getElementById("testButton");
+            const result = document.getElementById("testResult");
+
+            const verifyUrl = '@Url.Action("Verify", "Token", new { area = "" })';
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                button.disabled = true;
+                result.className = "mt-4 alert alert-info";
+                result.textContent = "Kontroller yapılıyor...";
+
+                try {
+                    const withoutToken = await fetch(verifyUrl, {
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    });
+
+                    if (withoutToken.status !== 401) {
+                        throw new Error(
+                            "Tokensız istekte beklenen 401 yanıtı alınamadı."
+                        );
+                    }
+
+                    const createResponse = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    });
+
+                    if (!createResponse.ok || createResponse.redirected) {
+                        throw new Error(
+                            "Token üretilemedi. Oturumunu kontrol edip tekrar dene."
+                        );
+                    }
+
+                    const token = await createResponse.json();
+
+                    if (!token.accessToken) {
+                        throw new Error("Token yanıtı beklenen biçimde değil.");
+                    }
+
+
+                    const verifyResponse = await fetch(verifyUrl, {
+                        headers: {
+                            Authorization: `Bearer ${token.accessToken}`
+                        },
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    });
+
+                    if (!verifyResponse.ok) {
+                        throw new Error("Üretilen JWT doğrulanamadı.");
+                    }
+
+                    const verified = await verifyResponse.json();
+
+                    const invalidResponse = await fetch(verifyUrl, {
+                        headers: {
+                            Authorization: "Bearer invalid-token"
+                        },
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    });
+
+                    if (invalidResponse.status !== 401) {
+                        throw new Error(
+                            "Geçersiz token için beklenen 401 yanıtı alınamadı."
+                        );
+                    }
+
+                    result.className = "mt-4 alert alert-success";
+                    result.textContent =
+                        `${verified.message} ` +
+                        `Kullanıcı: ${verified.userName}. ` +
+                        `Roller: ${verified.roles.join(", ")}. ` +
+                        "Tokensız ve geçersiz token içeren istekler 401 ile reddedildi.";
+                } catch (error) {
+                    result.className = "mt-4 alert alert-danger";
+                    result.textContent = error.message;
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+}
