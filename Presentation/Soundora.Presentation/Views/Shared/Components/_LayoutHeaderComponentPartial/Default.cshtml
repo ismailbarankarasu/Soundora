@@ -1,0 +1,124 @@
+﻿<header class="header-area">
+    <div class="oneMusic-main-menu">
+        <div class="classy-nav-container breakpoint-off">
+            <div class="container">
+
+                <nav class="classy-navbar justify-content-between"
+                     id="oneMusicNav">
+
+                    <!-- Logo -->
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       class="nav-brand">
+                        <img src="~/one-music-gh-pages/img/core-img/logo.png"
+                             alt="Soundora">
+                    </a>
+
+                    <!-- Mobil menü butonu -->
+                    <div class="classy-navbar-toggler">
+                        <span class="navbarToggler">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </div>
+
+                    <div class="classy-menu">
+
+                        <!-- Mobil menüyü kapat -->
+                        <div class="classycloseIcon">
+                            <div class="cross-wrap">
+                                <span class="top"></span>
+                                <span class="bottom"></span>
+                            </div>
+                        </div>
+
+                        <!-- Menü -->
+                        <div class="classynav">
+                            <ul>
+                                <li>
+                                    <a asp-area=""
+                                       asp-controller="Home"
+                                       asp-action="Index">
+                                        Ana Sayfa
+                                    </a>
+                                </li>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a href="#">Yönetim</a>
+
+                                        <ul class="dropdown">
+                                            <li>
+                                                <a asp-area="Admin"
+                                                   asp-controller="Categories"
+                                                   asp-action="Index">
+                                                    Kategori Yönetimi
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a asp-area="Admin"
+                                                   asp-controller="Artists"
+                                                   asp-action="Index">
+                                                    Sanatçı Yönetimi
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                }
+                            </ul>
+
+                            <!-- Kullanıcı işlemleri -->
+                            <div class="login-register-cart-button d-flex align-items-center">
+
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <span class="text-white mr-3">
+                                        @User.Identity.Name
+                                    </span>
+
+                                    <form asp-area=""
+                                          asp-controller="Account"
+                                          asp-action="Logout"
+                                          method="post"
+                                          class="mb-0">
+
+                                        <button type="submit"
+                                                class="btn btn-outline-light btn-sm">
+                                            Çıkış Yap
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="login-register-btn mr-3">
+                                        <a asp-area=""
+                                           asp-controller="Account"
+                                           asp-action="Login"
+                                           id="loginBtn">
+                                            Giriş Yap
+                                        </a>
+                                    </div>
+
+                                    <div class="login-register-btn">
+                                        <a asp-area=""
+                                           asp-controller="Account"
+                                           asp-action="Register">
+                                            Kayıt Ol
+                                        </a>
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+
+                    </div>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+</header>

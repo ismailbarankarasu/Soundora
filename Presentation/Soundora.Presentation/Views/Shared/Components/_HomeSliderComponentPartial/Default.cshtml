@@ -1,0 +1,89 @@
+﻿<section class="hero-area">
+    <div class="hero-slides owl-carousel">
+
+        <div class="single-hero-slide d-flex align-items-center justify-content-center">
+
+            <div class="slide-img bg-img"
+                 style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-1.jpg")');">
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="hero-slides-content text-center">
+
+                            <h6 data-animation="fadeInUp"
+                                data-delay="100ms">
+                                Müziğin dünyasına katıl
+                            </h6>
+
+                            <h2 data-animation="fadeInUp"
+                                data-delay="300ms">
+                                SOUNDORA
+                                <span>SOUNDORA</span>
+                            </h2>
+
+                            @if (User.Identity?.IsAuthenticated != true)
+                            {
+                                <a asp-area=""
+                                   asp-controller="Account"
+                                   asp-action="Register"
+                                   class="btn oneMusic-btn mt-50"
+                                   data-animation="fadeInUp"
+                                   data-delay="500ms">
+                                    Hemen Katıl
+                                    <i class="fa fa-angle-double-right"></i>
+                                </a>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="single-hero-slide d-flex align-items-center justify-content-center">
+
+            <div class="slide-img bg-img"
+                 style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="hero-slides-content text-center">
+
+                            <h6 data-animation="fadeInUp"
+                                data-delay="100ms">
+                                Müzik ve podcast bir arada
+                            </h6>
+
+                            <h2 data-animation="fadeInUp"
+                                data-delay="300ms">
+                                KEŞFET
+                                <span>KEŞFET</span>
+                            </h2>
+
+                            @if (User.Identity?.IsAuthenticated != true)
+                            {
+                                <a asp-area=""
+                                   asp-controller="Account"
+                                   asp-action="Login"
+                                   class="btn oneMusic-btn mt-50"
+                                   data-animation="fadeInUp"
+                                   data-delay="500ms">
+                                    Giriş Yap
+                                    <i class="fa fa-angle-double-right"></i>
+                                </a>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>

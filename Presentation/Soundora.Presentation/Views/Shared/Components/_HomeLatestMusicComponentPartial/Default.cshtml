@@ -1,0 +1,63 @@
+﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Music.Models.LatestMusicDto>
+
+<section class="latest-albums-area section-padding-100">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="section-heading style-2">
+                    <p>Soundora’da yeni sesler keşfet</p>
+                    <h2>Son Eklenen Müzikler</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+
+            @if (Model.Count == 0)
+            {
+                <div class="col-12 text-center">
+                    <p>Henüz müzik eklenmedi.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var music in Model)
+                {
+                    var coverImageUrl =
+                        string.IsNullOrWhiteSpace(music.CoverImageUrl)
+                            ? Url.Content("~/one-music-gh-pages/img/bg-img/bg-1.jpg")
+                            : Url.Content(music.CoverImageUrl);
+
+                    var badgeClass = music.AccessLevelName == "Gold"
+                        ? "badge-warning"
+                        : "badge-secondary";
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="single-album-area mb-30">
+
+                            <div class="album-thumb">
+                                <img src="@coverImageUrl"
+                                     alt="@music.Title"
+                                     loading="lazy"
+                                     style="width: 100%; aspect-ratio: 1; object-fit: cover;">
+                            </div>
+
+                            <div class="album-info">
+                                <h5>@music.Title</h5>
+                                <p>@music.ArtistName</p>
+
+                                <span class="badge @badgeClass">
+                                    @music.AccessLevelName
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            }
+
+        </div>
+
+    </div>
+</section>

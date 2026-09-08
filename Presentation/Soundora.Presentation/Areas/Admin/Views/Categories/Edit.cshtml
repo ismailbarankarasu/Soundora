@@ -1,0 +1,77 @@
+﻿@using Soundora.Application.Categories.Models
+@model UpdateCategoryRequest
+
+@{
+    ViewData["Title"] = "Kategori Güncelle";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Kategori Yönetimi</p>
+        <h2>Kategori Güncelle</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+
+                <form asp-area="Admin"
+                      asp-controller="Categories"
+                      asp-action="Edit"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    <input asp-for="Id" type="hidden">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Name">Kategori Adı</label>
+                        <input asp-for="Name" class="form-control">
+                        <span asp-validation-for="Name"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description">Açıklama</label>
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4"></textarea>
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group form-check">
+                        <input asp-for="IsActive"
+                               class="form-check-input">
+                        <label asp-for="IsActive"
+                               class="form-check-label">
+                            Aktif
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn oneMusic-btn">
+                        Güncelle
+                    </button>
+
+                    <a asp-area="Admin"
+                       asp-controller="Categories"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary ml-2">
+                        İptal
+                    </a>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Soundora.Application.Artists.Abstractions;
 using Soundora.Application.Authentication.Abstractions;
+using Soundora.Application.Categories.Abstractions;
+using Soundora.Application.Music.Abstractions;
 using Soundora.Persistence.Contexts;
 using Soundora.Persistence.Identity;
 using Soundora.Persistence.Seeds;
@@ -46,8 +49,10 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddScoped<DataSeeder>();
-        services.AddScoped<DataSeeder>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IMusicService, MusicService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IArtistService, ArtistService>();
         return services;
     }
 }

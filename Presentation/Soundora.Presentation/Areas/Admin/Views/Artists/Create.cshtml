@@ -1,0 +1,60 @@
+﻿@model CreateArtistRequest
+
+@{
+    ViewData["Title"] = "Sanatçı Ekle";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Sanatçı Yönetimi</p>
+        <h2>Sanatçı Ekle</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+
+                <form asp-area="Admin"
+                      asp-controller="Artists"
+                      asp-action="Create"
+                      method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Name">Sanatçı Adı</label>
+
+                        <input asp-for="Name"
+                               class="form-control"
+                               placeholder="Sanatçı veya grup adı">
+
+                        <span asp-validation-for="Name"
+                              class="text-danger"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn oneMusic-btn">
+                        Kaydet
+                    </button>
+
+                    <a asp-area="Admin"
+                       asp-controller="Artists"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary ml-2">
+                        İptal
+                    </a>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}
