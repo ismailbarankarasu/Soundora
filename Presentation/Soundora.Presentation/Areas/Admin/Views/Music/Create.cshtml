@@ -1,0 +1,129 @@
+﻿@model Soundora.Presentation.Models.Music.CreateMusicViewModel
+
+@{
+    ViewData["Title"] = "Müzik Ekle";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Müzik Yönetimi</p>
+        <h2>Müzik Ekle</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+
+                @if (TempData["Success"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="alert">
+                        @successMessage
+                    </div>
+                }
+
+                @if (Model.Categories.Count == 0)
+                {
+                    <div class="alert alert-warning">
+                        Müzik eklemek için önce aktif bir kategori oluşturmalısınız.
+                    </div>
+                }
+
+                <form asp-area="Admin"
+                      asp-controller="Music"
+                      asp-action="Create"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Title">Müzik Adı</label>
+                        <input asp-for="Title" class="form-control">
+                        <span asp-validation-for="Title"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description">Açıklama</label>
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4"></textarea>
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="CategoryId">Kategori</label>
+                        <select asp-for="CategoryId"
+                                asp-items="Model.Categories"
+                                class="form-control">
+                            <option value="">Kategori seçiniz</option>
+                        </select>
+                        <span asp-validation-for="CategoryId"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ArtistId">Sanatçı</label>
+                        <select asp-for="ArtistId"
+                                asp-items="Model.Artists"
+                                class="form-control">
+                            <option value="">Sanatçı belirtilmedi</option>
+                        </select>
+                        <span asp-validation-for="ArtistId"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="RequiredAccessLevel">
+                            Gerekli Paket
+                        </label>
+                        <select asp-for="RequiredAccessLevel"
+                                class="form-control">
+                            <option value="1">Basic</option>
+                            <option value="2">Gold</option>
+                        </select>
+                        <span asp-validation-for="RequiredAccessLevel"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="AudioFile">MP3 Dosyası</label>
+                        <input asp-for="AudioFile"
+                               type="file"
+                               accept=".mp3,audio/mpeg"
+                               class="form-control-file">
+
+                        <small class="form-text text-muted">
+                            En fazla 20 MB. Bir hata sonrası dosyayı yeniden seçiniz.
+                        </small>
+
+                        <span asp-validation-for="AudioFile"
+                              class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn oneMusic-btn">
+                        Kaydet
+                    </button>
+
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary ml-2">
+                        Ana Sayfaya Dön
+                    </a>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

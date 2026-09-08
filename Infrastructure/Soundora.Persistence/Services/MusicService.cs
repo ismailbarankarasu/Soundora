@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Soundora.Application.Music.Abstractions;
 using Soundora.Application.Music.Models;
+using Soundora.Domain.Entities;
 using Soundora.Domain.Enums;
 using Soundora.Persistence.Contexts;
+using System.ComponentModel.DataAnnotations;
 
 namespace Soundora.Persistence.Services;
 
@@ -13,6 +15,98 @@ public class MusicService : IMusicService
     public MusicService(AppDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<MusicOperationResult> CreateAsync(
+    CreateMusicRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        var validationResults = new List<ValidationResult>();
+
+        var isValid = Validator.TryValidateObject(
+            request,
+            new ValidationContext(request),
+            validationResults,
+            validateAllProperties: true);
+
+        if (!isValid)
+        {
+            return new MusicOperationResult
+            {
+                Succeeded = false,
+                Error = validationResults[0].ErrorMessage
+            };
+        }
+
+        if (request.RequiredAccessLevel != AccessLevel.Basic &&
+            request.RequiredAccessLevel != AccessLevel.Gold)
+        {
+            return new MusicOperationResult
+            {
+                Succeeded = false,
+                Error = "Basic veya Gold paket seviyesini seçiniz."
+            };
+        }
+
+        var categoryExists = await _context.Categories.AnyAsync(x => x.Id == request.CategoryId && x.IsActive, cancellationToken);
+
+        if (!categoryExists)
+        {
+            return new MusicOperationResult
+            {
+                Succeeded = false,
+                Error = "Seçilen kategori bulunamadı veya aktif değil."
+            };
+        }
+
+        if (request.ArtistId.HasValue)
+        {
+            var artistExists = await _context.Artists
+                .AnyAsync(
+                    x => x.Id == request.ArtistId.Value && x.IsActive,
+                    cancellationToken);
+
+            if (!artistExists)
+            {
+                return new MusicOperationResult
+                {
+                    Succeeded = false,
+                    Error = "Seçilen sanatçı bulunamadı veya aktif değil."
+                };
+            }
+        }
+
+        var music = new AudioContent
+        {
+            Title = request.Title.Trim(),
+            Description = string.IsNullOrWhiteSpace(request.Description)
+                ? null
+                : request.Description.Trim(),
+
+            CategoryId = request.CategoryId,
+            ArtistId = request.ArtistId,
+
+            ContentType = ContentType.Music,
+            RequiredAccessLevel = request.RequiredAccessLevel,
+            DurationInSeconds = request.DurationInSeconds,
+            FilePath = request.FilePath,
+
+            CoverImagePath = string.IsNullOrWhiteSpace(request.CoverImagePath)
+                ? null
+                : request.CoverImagePath,
+
+            IsActive = true
+        };
+
+        _context.AudioContents.Add(music);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new MusicOperationResult
+        {
+            Succeeded = true,
+            Id = music.Id
+        };
     }
 
     public async Task<IReadOnlyList<LatestMusicDto>> GetLatestAsync(

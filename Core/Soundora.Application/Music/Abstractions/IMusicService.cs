@@ -4,6 +4,7 @@ namespace Soundora.Application.Music.Abstractions;
 
 public interface IMusicService
 {
-    Task<IReadOnlyList<LatestMusicDto>> GetLatestAsync(
-        CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<LatestMusicDto>> GetLatestAsync(CancellationToken cancellationToken = default);
+
+    Task<MusicOperationResult> CreateAsync(CreateMusicRequest request, CancellationToken cancellationToken = default);
 }

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Soundora.Application.Authentication.Abstractions;
+using Soundora.Application.Files.Abstractions;
 using Soundora.Infrastructure.Authentication;
+using Soundora.Infrastructure.Files;
 using Soundora.Persistence;
 using Soundora.Persistence.Seeds;
 using System.Text;
@@ -111,6 +113,22 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+
+var audioStorageSettings = new AudioStorageSettings
+{
+    RootPath = Path.Combine(
+        builder.Environment.ContentRootPath,
+        "App_Data",
+        "Audio"),
+
+    MaxFileSizeBytes = 20 * 1024 * 1024
+};
+
+builder.Services.AddSingleton(audioStorageSettings);
+
+builder.Services.AddScoped<
+    IAudioFileStorage,
+    LocalAudioFileStorage>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Soundora.Application.Music.Models;
 
-namespace Soundora.Application.Music.Models
+public class MusicOperationResult
 {
-    internal class MusicOperationResult
-    {
-    }
+    public bool Succeeded { get; init; }
+
+    public Guid? Id { get; init; }
+
+    public string? Error { get; init; }
 }

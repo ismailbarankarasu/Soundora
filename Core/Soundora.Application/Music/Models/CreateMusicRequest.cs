@@ -24,4 +24,7 @@ public class CreateMusicRequest
     public string FilePath { get; set; } = string.Empty;
 
     public string? CoverImagePath { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir müzik süresi gereklidir.")]
+    public int DurationInSeconds { get; set; }
 }
