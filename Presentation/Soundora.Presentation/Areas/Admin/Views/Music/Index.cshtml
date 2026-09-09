@@ -54,6 +54,10 @@
                             <th>Süre</th>
                             <th>Paket</th>
                             <th>Durum</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th>İşlemler</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -78,6 +82,20 @@
                                         @(music.IsActive ? "Aktif" : "Pasif")
                                     </span>
                                 </td>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+                                            <a asp-area="Admin"
+                                               asp-controller="Music"
+                                               asp-action="Edit"
+                                               asp-route-id="@music.Id"
+                                               class="btn btn-outline-primary btn-sm">
+                                                Güncelle
+                                            </a>
+                                        </div>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>

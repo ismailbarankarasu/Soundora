@@ -209,4 +209,117 @@ public class MusicController : Controller
                 filePath);
         }
     }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
+    {
+        var music = await _musicService.GetForUpdateAsync(
+            id,
+            cancellationToken);
+
+        if (music is null)
+        {
+            return NotFound();
+        }
+
+        var model = new UpdateMusicViewModel
+        {
+            Input = music
+        };
+
+        await PopulateEditListsAsync(
+            model,
+            music.CategoryId,
+            music.ArtistId,
+            cancellationToken);
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        Guid id,
+        UpdateMusicViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (id != model.Input.Id)
+        {
+            return BadRequest();
+        }
+
+        var currentMusic = await _musicService.GetForUpdateAsync(
+            id,
+            cancellationToken);
+
+        if (currentMusic is null)
+        {
+            return NotFound();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateEditListsAsync(
+                model,
+                currentMusic.CategoryId,
+                currentMusic.ArtistId,
+                cancellationToken);
+
+            return View(model);
+        }
+
+        var result = await _musicService.UpdateAsync(
+            model.Input,
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                result.Error ?? "Müzik güncellenemedi.");
+
+            await PopulateEditListsAsync(
+                model,
+                currentMusic.CategoryId,
+                currentMusic.ArtistId,
+                cancellationToken);
+
+            return View(model);
+        }
+
+        TempData["Success"] = "Müzik başarıyla güncellendi.";
+
+        return RedirectToAction(nameof(Index));
+    }
+    private async Task PopulateEditListsAsync(UpdateMusicViewModel model, Guid? currentCategoryId, Guid? currentArtistId, CancellationToken cancellationToken)
+    {
+        var categories = await _categoryService.GetAllAsync(cancellationToken);
+
+        model.Categories = categories
+            .Where(x => x.IsActive || x.Id == currentCategoryId)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.IsActive
+                    ? x.Name
+                    : $"{x.Name} (Pasif)"
+            })
+            .ToList();
+
+        var artists = await _artistService.GetAllAsync(
+            cancellationToken);
+
+        model.Artists = artists
+            .Where(x => x.IsActive || x.Id == currentArtistId)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.IsActive
+                    ? x.Name
+                    : $"{x.Name} (Pasif)"
+            })
+            .ToList();
+    }
 }
