@@ -5,6 +5,7 @@ using Soundora.Application.Artists.Abstractions;
 using Soundora.Application.Authentication.Abstractions;
 using Soundora.Application.Categories.Abstractions;
 using Soundora.Application.Music.Abstractions;
+using Soundora.Application.Packages.Abstractions;
 using Soundora.Application.Playback.Abstractions;
 using Soundora.Application.Subscriptions.Abstractions;
 using Soundora.Persistence.Contexts;
