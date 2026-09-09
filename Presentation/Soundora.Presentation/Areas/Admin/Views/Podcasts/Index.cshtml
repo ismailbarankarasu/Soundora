@@ -51,6 +51,7 @@
                             <th>Süre</th>
                             <th>Paket</th>
                             <th>Durum</th>
+                            <th>İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,6 +75,17 @@
                                     <span class="badge @(podcast.IsActive ? "badge-success" : "badge-secondary")">
                                         @(podcast.IsActive ? "Aktif" : "Pasif")
                                     </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+                                        <a asp-area="Admin"
+                                           asp-controller="Podcasts"
+                                           asp-action="Edit"
+                                           asp-route-id="@podcast.Id"
+                                           class="btn btn-outline-primary btn-sm">
+                                            Güncelle
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         }

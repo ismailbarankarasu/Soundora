@@ -199,4 +199,111 @@ public class PodcastsController : Controller
                 filePath);
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
+    {
+        var podcast = await _podcastService.GetForUpdateAsync(
+            id,
+            cancellationToken);
+
+        if (podcast is null)
+        {
+            return NotFound();
+        }
+
+        var model = new UpdatePodcastViewModel
+        {
+            Input = podcast
+        };
+
+        await PopulateEditListsAsync(
+            model,
+            podcast.CategoryId,
+            podcast.ArtistId,
+            cancellationToken);
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, UpdatePodcastViewModel model, CancellationToken cancellationToken)
+    {
+        if (id != model.Input.Id)
+        {
+            return BadRequest();
+        }
+
+        var currentPodcast = await _podcastService.GetForUpdateAsync(
+            id,
+            cancellationToken);
+
+        if (currentPodcast is null)
+        {
+            return NotFound();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateEditListsAsync(
+                model,
+                currentPodcast.CategoryId,
+                currentPodcast.ArtistId,
+                cancellationToken);
+
+            return View(model);
+        }
+
+        var result = await _podcastService.UpdateAsync(
+            model.Input,
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                result.Error ?? "Podcast güncellenemedi.");
+
+            await PopulateEditListsAsync(
+                model,
+                currentPodcast.CategoryId,
+                currentPodcast.ArtistId,
+                cancellationToken);
+
+            return View(model);
+        }
+
+        TempData["Success"] = "Podcast başarıyla güncellendi.";
+
+        return RedirectToAction(nameof(Index));
+    }
+    private async Task PopulateEditListsAsync(UpdatePodcastViewModel model, Guid? currentCategoryId, Guid? currentArtistId, CancellationToken cancellationToken)
+    {
+        var categories = await _categoryService.GetAllAsync(cancellationToken);
+
+        model.Categories = categories
+            .Where(x => x.IsActive || x.Id == currentCategoryId)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.IsActive
+                    ? x.Name
+                    : $"{x.Name} (Pasif)"
+            })
+            .ToList();
+
+        var artists = await _artistService.GetAllAsync(cancellationToken);
+
+        model.Hosts = artists
+            .Where(x => x.IsActive || x.Id == currentArtistId)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.IsActive
+                    ? x.Name
+                    : $"{x.Name} (Pasif)"
+            })
+            .ToList();
+    }
 }
