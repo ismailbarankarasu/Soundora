@@ -10,4 +10,5 @@ public class UpdatePodcastViewModel
     public List<SelectListItem> Categories { get; set; } = new();
 
     public List<SelectListItem> Hosts { get; set; } = new();
+    public IFormFile? CoverImage { get; set; }
 }

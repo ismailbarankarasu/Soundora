@@ -19,18 +19,15 @@ public class MusicController : Controller
     private readonly IArtistService _artistService;
     private readonly IAudioFileStorage _audioFileStorage;
     private readonly ILogger<MusicController> _logger;
+    private readonly ICoverFileStorage _coverFileStorage;
 
-    public MusicController(
-        IMusicService musicService,
-        ICategoryService categoryService,
-        IArtistService artistService,
-        IAudioFileStorage audioFileStorage,
-        ILogger<MusicController> logger)
+    public MusicController(IMusicService musicService, ICategoryService categoryService, IArtistService artistService, IAudioFileStorage audioFileStorage, ICoverFileStorage coverFileStorage, ILogger<MusicController> logger)
     {
         _musicService = musicService;
         _categoryService = categoryService;
         _artistService = artistService;
         _audioFileStorage = audioFileStorage;
+        _coverFileStorage = coverFileStorage;
         _logger = logger;
     }
 
@@ -57,11 +54,11 @@ public class MusicController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(25 * 1024 * 1024)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 25 * 1024 * 1024)]
+    [RequestSizeLimit(30 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 30 * 1024 * 1024)]
     public async Task<IActionResult> Create(
-        CreateMusicViewModel model,
-        CancellationToken cancellationToken)
+    CreateMusicViewModel model,
+    CancellationToken cancellationToken)
     {
         if (model.AudioFile is not null)
         {
@@ -69,7 +66,7 @@ public class MusicController : Controller
             {
                 ModelState.AddModelError(
                     nameof(model.AudioFile),
-                    "Boş dosya yükleyemezsiniz.");
+                    "Boş ses dosyası yükleyemezsiniz.");
             }
             else if (model.AudioFile.Length > 20 * 1024 * 1024)
             {
@@ -79,24 +76,61 @@ public class MusicController : Controller
             }
         }
 
+        if (model.CoverImage is not null)
+        {
+            if (model.CoverImage.Length == 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.CoverImage),
+                    "Boş kapak görseli yükleyemezsiniz.");
+            }
+            else if (model.CoverImage.Length > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(
+                    nameof(model.CoverImage),
+                    "Kapak görseli en fazla 5 MB olabilir.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             await PopulateListsAsync(model, cancellationToken);
             return View(model);
         }
 
-        string? uploadedFilePath = null;
+        string? audioPath = null;
+        string? coverPath = null;
+
+        var savingRecord = false;
+        var fileField = nameof(model.CoverImage);
 
         try
         {
-            await using var stream = model.AudioFile!.OpenReadStream();
+            if (model.CoverImage is not null)
+            {
+                await using var coverStream =
+                    model.CoverImage.OpenReadStream();
 
-            var storedFile = await _audioFileStorage.SaveAsync(
-                stream,
+                var storedCover = await _coverFileStorage.SaveAsync(
+                    coverStream,
+                    model.CoverImage.FileName,
+                    cancellationToken);
+
+                coverPath = storedCover.FilePath;
+            }
+
+            fileField = nameof(model.AudioFile);
+
+            await using var audioStream =
+                model.AudioFile!.OpenReadStream();
+
+            var storedAudio = await _audioFileStorage.SaveAsync(
+                audioStream,
                 model.AudioFile.FileName,
                 cancellationToken);
 
-            uploadedFilePath = storedFile.FilePath;
+            audioPath = storedAudio.FilePath;
+            savingRecord = true;
 
             var result = await _musicService.CreateAsync(
                 new CreateMusicRequest
@@ -106,15 +140,21 @@ public class MusicController : Controller
                     CategoryId = model.CategoryId!.Value,
                     ArtistId = model.ArtistId,
                     RequiredAccessLevel = model.RequiredAccessLevel,
-                    FilePath = storedFile.FilePath,
-                    DurationInSeconds = storedFile.DurationInSeconds
+                    FilePath = audioPath,
+                    CoverImagePath = coverPath,
+                    DurationInSeconds = storedAudio.DurationInSeconds
                 },
                 cancellationToken);
 
             if (!result.Succeeded)
             {
-                await CleanupFileAsync(uploadedFilePath);
-                uploadedFilePath = null;
+                savingRecord = false;
+
+                await CleanupFileAsync(audioPath);
+                await CleanupCoverAsync(coverPath);
+
+                audioPath = null;
+                coverPath = null;
 
                 ModelState.AddModelError(
                     string.Empty,
@@ -122,36 +162,50 @@ public class MusicController : Controller
             }
             else
             {
-                uploadedFilePath = null;
-
                 TempData["Success"] = "Müzik başarıyla eklendi.";
 
                 return RedirectToAction(nameof(Index));
             }
         }
-        catch (InvalidDataException exception)
+        catch (InvalidDataException exception) when (!savingRecord)
         {
-            await CleanupFileAsync(uploadedFilePath);
+            await CleanupFileAsync(audioPath);
+            await CleanupCoverAsync(coverPath);
 
             ModelState.AddModelError(
-                nameof(model.AudioFile),
+                fileField,
                 exception.Message);
         }
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
         {
+            if (!savingRecord)
+            {
+                await CleanupFileAsync(audioPath);
+                await CleanupCoverAsync(coverPath);
+            }
+
             throw;
         }
         catch (Exception exception)
         {
+            if (!savingRecord)
+            {
+                await CleanupFileAsync(audioPath);
+                await CleanupCoverAsync(coverPath);
+            }
+
             _logger.LogError(
                 exception,
-                "Müzik eklenirken hata oluştu. Dosya: {FilePath}",
-                uploadedFilePath);
+                "Müzik eklenemedi. Ses: {AudioPath}, Kapak: {CoverPath}",
+                audioPath,
+                coverPath);
 
             ModelState.AddModelError(
                 string.Empty,
-                "İşlem tamamlanamadı. Tekrar denemeden önce kaydın oluşup oluşmadığını kontrol edin.");
+                savingRecord
+                    ? "İşlem sonucu doğrulanamadı. Tekrar denemeden önce müzik listesini kontrol edin."
+                    : "Dosyalar yüklenemedi. Lütfen tekrar deneyiniz.");
         }
 
         await PopulateListsAsync(model, cancellationToken);
@@ -337,6 +391,8 @@ public class MusicController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        var cleanupFailed = false;
+
         if (!string.IsNullOrWhiteSpace(result.FilePath))
         {
             try
@@ -345,19 +401,63 @@ public class MusicController : Controller
             }
             catch (Exception exception)
             {
+                cleanupFailed = true;
+
                 _logger.LogError(
                     exception,
                     "Silinen müziğin ses dosyası temizlenemedi: {FilePath}",
                     result.FilePath);
-
-                TempData["Warning"] = "Müzik kaydı silindi ancak ses dosyası temizlenemedi.";
-
-                return RedirectToAction(nameof(Index));
             }
         }
 
-        TempData["Success"] = "Müzik başarıyla silindi.";
+        if (!string.IsNullOrWhiteSpace(result.CoverImagePath))
+        {
+            try
+            {
+                await _coverFileStorage.DeleteAsync(result.CoverImagePath, CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                cleanupFailed = true;
+
+                _logger.LogError(
+                    exception,
+                    "Silinen müziğin kapak dosyası temizlenemedi: {FilePath}",
+                    result.CoverImagePath);
+            }
+        }
+
+        if (cleanupFailed)
+        {
+            TempData["Warning"] =
+                "Müzik kaydı silindi ancak bazı dosyalar temizlenemedi.";
+        }
+        else
+        {
+            TempData["Success"] = "Müzik başarıyla silindi.";
+        }
 
         return RedirectToAction(nameof(Index));
+    }
+    private async Task CleanupCoverAsync(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            return;
+        }
+
+        try
+        {
+            await _coverFileStorage.DeleteAsync(
+                filePath,
+                CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Kullanılmayan kapak dosyası temizlenemedi: {FilePath}",
+                filePath);
+        }
     }
 }

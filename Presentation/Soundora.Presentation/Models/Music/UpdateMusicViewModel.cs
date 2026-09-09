@@ -10,4 +10,5 @@ public class UpdateMusicViewModel
     public List<SelectListItem> Categories { get; set; } = new();
 
     public List<SelectListItem> Artists { get; set; } = new();
+    public IFormFile? CoverImage { get; set; }
 }

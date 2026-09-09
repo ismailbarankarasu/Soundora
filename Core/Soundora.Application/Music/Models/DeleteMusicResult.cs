@@ -7,4 +7,5 @@ public class DeleteMusicResult
     public string? Error { get; init; }
 
     public string? FilePath { get; init; }
+    public string? CoverImagePath { get; init; }
 }

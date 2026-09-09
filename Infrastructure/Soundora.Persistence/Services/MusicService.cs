@@ -17,9 +17,7 @@ public class MusicService : IMusicService
         _context = context;
     }
 
-    public async Task<MusicOperationResult> CreateAsync(
-    CreateMusicRequest request,
-    CancellationToken cancellationToken = default)
+    public async Task<MusicOperationResult> CreateAsync(CreateMusicRequest request, CancellationToken cancellationToken = default)
     {
         var validationResults = new List<ValidationResult>();
 
@@ -127,6 +125,7 @@ public class MusicService : IMusicService
         }
 
         var filePath = music.FilePath;
+        var coverImagePath = music.CoverImagePath;
 
         _context.AudioContents.Remove(music);
 
@@ -135,7 +134,8 @@ public class MusicService : IMusicService
         return new DeleteMusicResult
         {
             Succeeded = true,
-            FilePath = filePath
+            FilePath = filePath,
+            CoverImagePath = coverImagePath
         };
     }
 

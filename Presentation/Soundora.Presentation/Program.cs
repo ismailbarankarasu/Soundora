@@ -126,16 +126,33 @@ var audioStorageSettings = new AudioStorageSettings
 
 builder.Services.AddSingleton(audioStorageSettings);
 
-builder.Services.AddScoped<
-    IAudioFileStorage,
-    LocalAudioFileStorage>();
+builder.Services.AddScoped<IAudioFileStorage, LocalAudioFileStorage>();
+
+var webRootPath = builder.Environment.WebRootPath
+    ?? Path.Combine(
+        builder.Environment.ContentRootPath,
+        "wwwroot");
+
+var coverStorageSettings = new CoverStorageSettings
+{
+    RootPath = Path.Combine(
+        webRootPath,
+        "uploads",
+        "covers"),
+
+    RequestPath = "/uploads/covers",
+    MaxFileSizeBytes = 5 * 1024 * 1024
+};
+
+builder.Services.AddSingleton(coverStorageSettings);
+
+builder.Services.AddScoped<ICoverFileStorage, LocalCoverFileStorage>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider
-        .GetRequiredService<DataSeeder>();
-
+    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
     await seeder.SeedAsync();
 }
 

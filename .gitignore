@@ -369,3 +369,6 @@ FodyWeavers.xsd
 # Track admin package views
 !**/Soundora.Presentation/Areas/Admin/Views/Packages/
 !**/Soundora.Presentation/Areas/Admin/Views/Packages/**
+
+# Uploaded cover images
+**/wwwroot/uploads/covers/
