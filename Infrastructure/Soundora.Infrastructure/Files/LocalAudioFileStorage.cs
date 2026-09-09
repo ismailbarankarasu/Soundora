@@ -161,4 +161,39 @@ public class LocalAudioFileStorage : IAudioFileStorage
                 exception);
         }
     }
+
+    public Task<Stream?> OpenReadAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(filePath) ||
+            filePath.Length != 36 ||
+            !filePath.EndsWith(".mp3", StringComparison.Ordinal) ||
+            !Guid.TryParseExact(filePath[..32], "N", out _))
+        {
+            return Task.FromResult<Stream?>(null);
+        }
+
+        var fullPath = Path.Combine(_settings.RootPath, filePath);
+
+        try
+        {
+            Stream stream = new FileStream(
+                fullPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 81920,
+                useAsync: true);
+
+            return Task.FromResult<Stream?>(stream);
+        }
+        catch (FileNotFoundException)
+        {
+            return Task.FromResult<Stream?>(null);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return Task.FromResult<Stream?>(null);
+        }
+    }
 }

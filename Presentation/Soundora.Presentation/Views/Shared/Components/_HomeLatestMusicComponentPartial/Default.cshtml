@@ -1,5 +1,14 @@
 ﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Music.Models.LatestMusicDto>
-
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <form id="playbackTokenForm"
+          asp-area=""
+          asp-controller="Token"
+          asp-action="Create"
+          method="post"
+          hidden>
+    </form>
+}
 <section class="latest-albums-area section-padding-100">
     <div class="container">
 
@@ -51,6 +60,28 @@
                                     @music.AccessLevelName
                                 </span>
                             </div>
+                            <div class="mt-3">
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-dark btn-sm js-play-music"
+                                            data-playback-url="@Url.Action("Play", "Playback", new { area = "", id = music.Id })"
+                                            data-title="@music.Title">
+                                        <i class="fa fa-play" aria-hidden="true"></i>
+                                        Dinle
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-area=""
+                                       asp-controller="Account"
+                                       asp-action="Login"
+                                       asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                                       class="btn btn-outline-dark btn-sm">
+                                        Dinlemek İçin Giriş Yap
+                                    </a>
+                                }
+                            </div>
 
                         </div>
                     </div>
@@ -58,6 +89,14 @@
             }
 
         </div>
+        <div id="musicPlaybackPanel" class="mt-4" hidden>
+            <h5 id="playingMusicTitle"></h5>
 
+            <div id="musicPlaybackMessage"
+                 role="status"
+                 aria-live="polite"></div>
+
+            <div id="musicPlayerHost" class="mt-3"></div>
+        </div>
     </div>
 </section>

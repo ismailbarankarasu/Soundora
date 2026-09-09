@@ -5,4 +5,8 @@
 
 @await Component.InvokeAsync("_HomeSliderComponentPartial")
 
-@await Component.InvokeAsync("_HomeLatestMusicComponentPartial")
+@await Component.InvokeAsync("_HomeLatestMusicComponentPartial");
+@section Scripts {
+    <script src="~/js/music-playback.js"
+            asp-append-version="true"></script>
+}

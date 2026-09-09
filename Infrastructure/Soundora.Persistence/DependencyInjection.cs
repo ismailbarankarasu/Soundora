@@ -5,6 +5,7 @@ using Soundora.Application.Artists.Abstractions;
 using Soundora.Application.Authentication.Abstractions;
 using Soundora.Application.Categories.Abstractions;
 using Soundora.Application.Music.Abstractions;
+using Soundora.Application.Playback.Abstractions;
 using Soundora.Application.Subscriptions.Abstractions;
 using Soundora.Persistence.Contexts;
 using Soundora.Persistence.Identity;
@@ -55,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<ISubscriptionService, SubscriptionService>();
+        services.AddScoped<IPlaybackAccessService, PlaybackAccessService>();
         return services;
     }
 }

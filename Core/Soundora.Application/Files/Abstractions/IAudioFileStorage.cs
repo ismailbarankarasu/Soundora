@@ -7,4 +7,6 @@ public interface IAudioFileStorage
     Task<StoredAudioFile> SaveAsync(Stream content, string originalFileName, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(string filePath, CancellationToken cancellationToken = default);
+    
+    Task<Stream?> OpenReadAsync(string filePath, CancellationToken cancellationToken = default);
 }
