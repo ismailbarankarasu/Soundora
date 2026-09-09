@@ -10,4 +10,5 @@ public interface IPackageService
     Task<UpdatePackageRequest?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<PackageOperationResult> UpdateAsync(UpdatePackageRequest request, CancellationToken cancellationToken = default);
+    Task<PackageOperationResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

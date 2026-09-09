@@ -200,4 +200,38 @@ public class PackageService : IPackageService
             Succeeded = true
         };
     }
+
+    public async Task<PackageOperationResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var package = await _context.SubscriptionPackages.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (package is null)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = "Paket bulunamadı."
+            };
+        }
+
+        var hasSubscriptions = await _context.UserSubscriptions.AnyAsync(x => x.SubscriptionPackageId == id, cancellationToken);
+
+        if (hasSubscriptions)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = "Bu pakete bağlı abonelik kayıtları bulunduğu için paket silinemez."
+            };
+        }
+
+        _context.SubscriptionPackages.Remove(package);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new PackageOperationResult
+        {
+            Succeeded = true
+        };
+    }
 }

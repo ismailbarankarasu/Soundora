@@ -101,4 +101,22 @@ public class PackagesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _packageService.DeleteAsync(id, cancellationToken);
+
+        if (result.Succeeded)
+        {
+            TempData["Success"] = "Paket başarıyla silindi.";
+        }
+        else
+        {
+            TempData["Error"] = result.Error ?? "Paket silinemedi.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }
