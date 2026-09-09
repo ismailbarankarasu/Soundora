@@ -11,7 +11,7 @@ using Soundora.Presentation.Models.Music;
 namespace Soundora.Presentation.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Manager")]
 public class MusicController : Controller
 {
     private readonly IMusicService _musicService;
@@ -35,6 +35,15 @@ public class MusicController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Index(
+    CancellationToken cancellationToken)
+    {
+        var musicList = await _musicService.GetAllAsync(cancellationToken);
+        return View(musicList);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(
         CancellationToken cancellationToken)
     {
@@ -46,6 +55,7 @@ public class MusicController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(25 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 25 * 1024 * 1024)]
@@ -112,12 +122,11 @@ public class MusicController : Controller
             }
             else
             {
-                // Kayıt başarılı; dosya artık müzik kaydına ait.
                 uploadedFilePath = null;
 
                 TempData["Success"] = "Müzik başarıyla eklendi.";
 
-                return RedirectToAction(nameof(Create));
+                return RedirectToAction(nameof(Index));
             }
         }
         catch (InvalidDataException exception)
@@ -131,8 +140,6 @@ public class MusicController : Controller
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
         {
-            // Veritabanı işleminin sonucu belirsiz olabilir.
-            // Dosyayı burada silerek olası başarılı kaydı bozmayız.
             throw;
         }
         catch (Exception exception)
@@ -142,8 +149,6 @@ public class MusicController : Controller
                 "Müzik eklenirken hata oluştu. Dosya: {FilePath}",
                 uploadedFilePath);
 
-            // Veritabanına yazmanın kesin sonucunu bilmediğimiz
-            // hatalarda dosyayı otomatik silmiyoruz.
             ModelState.AddModelError(
                 string.Empty,
                 "İşlem tamamlanamadı. Tekrar denemeden önce kaydın oluşup oluşmadığını kontrol edin.");

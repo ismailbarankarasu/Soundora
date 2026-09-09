@@ -1,0 +1,89 @@
+﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Music.Models.AdminMusicDto>
+
+@{
+    ViewData["Title"] = "Müzik Yönetimi";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Yönetim Paneli</p>
+        <h2>Müzikler</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">
+                @successMessage
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Müzik Listesi</h4>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-area="Admin"
+                   asp-controller="Music"
+                   asp-action="Create"
+                   class="btn oneMusic-btn">
+                    Müzik Ekle
+                </a>
+            }
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="alert alert-info">
+                Henüz müzik eklenmedi.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Müzik Adı</th>
+                            <th>Sanatçı</th>
+                            <th>Kategori</th>
+                            <th>Süre</th>
+                            <th>Paket</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var music in Model)
+                        {
+                            var minutes = music.DurationInSeconds / 60;
+                            var seconds = music.DurationInSeconds % 60;
+                            var durationText = $"{minutes}:{seconds:D2}";
+
+                            <tr>
+                                <td>@music.Title</td>
+                                <td>@music.ArtistName</td>
+                                <td>@music.CategoryName</td>
+                                <td>@durationText</td>
+                                <td>
+                                    <span class="badge @(music.AccessLevelName == "Gold" ? "badge-warning" : "badge-secondary")">
+                                        @music.AccessLevelName
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @(music.IsActive ? "badge-success" : "badge-secondary")">
+                                        @(music.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</section>

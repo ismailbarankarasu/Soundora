@@ -109,6 +109,37 @@ public class MusicService : IMusicService
         };
     }
 
+    public async Task<IReadOnlyList<AdminMusicDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.AudioContents
+            .AsNoTracking()
+            .Where(x => x.ContentType == ContentType.Music)
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Select(x => new AdminMusicDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+
+                ArtistName = x.Artist != null
+                    ? x.Artist.Name
+                    : "Belirtilmedi",
+
+                CategoryName = x.Category.Name,
+
+                AccessLevelName =
+                    x.RequiredAccessLevel == AccessLevel.Gold
+                        ? "Gold"
+                        : x.RequiredAccessLevel == AccessLevel.Basic
+                            ? "Basic"
+                            : "Standart",
+
+                DurationInSeconds = x.DurationInSeconds,
+                IsActive = x.IsActive
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<LatestMusicDto>> GetLatestAsync(
         CancellationToken cancellationToken = default)
     {

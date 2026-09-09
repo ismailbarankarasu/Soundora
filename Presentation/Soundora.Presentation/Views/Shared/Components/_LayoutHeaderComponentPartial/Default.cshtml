@@ -45,7 +45,7 @@
                                     </a>
                                 </li>
 
-                                @if (User.IsInRole("Admin"))
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                 {
                                     <li>
                                         <a href="#">Yönetim</a>
@@ -53,35 +53,40 @@
                                         <ul class="dropdown">
                                             <li>
                                                 <a asp-area="Admin"
-                                                   asp-controller="Categories"
-                                                   asp-action="Index">
-                                                    Kategori Yönetimi
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a asp-area="Admin"
-                                                   asp-controller="Artists"
-                                                   asp-action="Index">
-                                                    Sanatçı Yönetimi
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a asp-area="Admin"
                                                    asp-controller="Music"
-                                                   asp-action="Create">
-                                                    Müzik Ekle
+                                                   asp-action="Index">
+                                                    Müzik Yönetimi
                                                 </a>
                                             </li>
-                                            <li>
-                                                <a asp-area="Admin"
-                                                   asp-controller="Subscriptions"
-                                                   asp-action="Assign">
-                                                    Paket Ata
-                                                </a>
-                                            </li>
+
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <li>
+                                                    <a asp-area="Admin"
+                                                       asp-controller="Categories"
+                                                       asp-action="Index">
+                                                        Kategori Yönetimi
+                                                    </a>
+                                                </li>
+
+                                                <li>
+                                                    <a asp-area="Admin"
+                                                       asp-controller="Artists"
+                                                       asp-action="Index">
+                                                        Sanatçı Yönetimi
+                                                    </a>
+                                                </li>
+
+                                                <li>
+                                                    <a asp-area="Admin"
+                                                       asp-controller="Subscriptions"
+                                                       asp-action="Assign">
+                                                        Paket Ata
+                                                    </a>
+                                                </li>
+                                            }
                                         </ul>
                                     </li>
-
                                 }
                             </ul>
 
