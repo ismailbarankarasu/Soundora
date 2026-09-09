@@ -11,4 +11,5 @@ public interface IMusicService
     Task<UpdateMusicRequest?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<MusicOperationResult> UpdateAsync(UpdateMusicRequest request, CancellationToken cancellationToken = default);
+    Task<DeleteMusicResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

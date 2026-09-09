@@ -21,7 +21,19 @@
                 @successMessage
             </div>
         }
+        @if (TempData["Error"] is string errorMessage)
+        {
+            <div class="alert alert-danger" role="alert">
+                @errorMessage
+            </div>
+        }
 
+        @if (TempData["Warning"] is string warningMessage)
+        {
+            <div class="alert alert-warning" role="alert">
+                @warningMessage
+            </div>
+        }
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0">Müzik Listesi</h4>
 
@@ -86,6 +98,7 @@
                                 {
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+
                                             <a asp-area="Admin"
                                                asp-controller="Music"
                                                asp-action="Edit"
@@ -93,6 +106,22 @@
                                                class="btn btn-outline-primary btn-sm">
                                                 Güncelle
                                             </a>
+
+                                            <form asp-area="Admin"
+                                                  asp-controller="Music"
+                                                  asp-action="Delete"
+                                                  asp-route-id="@music.Id"
+                                                  method="post"
+                                                  style="margin: 0;"
+                                                  onsubmit="return confirm('Bu müziği kalıcı olarak silmek istediğinize emin misiniz?');">
+
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm">
+                                                    Sil
+                                                </button>
+
+                                            </form>
+
                                         </div>
                                     </td>
                                 }

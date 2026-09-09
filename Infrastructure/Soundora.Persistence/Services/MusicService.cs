@@ -109,6 +109,36 @@ public class MusicService : IMusicService
         };
     }
 
+    public async Task<DeleteMusicResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var music = await _context.AudioContents
+            .FirstOrDefaultAsync(
+                x => x.Id == id &&
+                     x.ContentType == ContentType.Music,
+                cancellationToken);
+
+        if (music is null)
+        {
+            return new DeleteMusicResult
+            {
+                Succeeded = false,
+                Error = "Müzik bulunamadı."
+            };
+        }
+
+        var filePath = music.FilePath;
+
+        _context.AudioContents.Remove(music);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new DeleteMusicResult
+        {
+            Succeeded = true,
+            FilePath = filePath
+        };
+    }
+
     public async Task<IReadOnlyList<AdminMusicDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.AudioContents

@@ -322,4 +322,42 @@ public class MusicController : Controller
             })
             .ToList();
     }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _musicService.DeleteAsync(id, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            TempData["Error"] = result.Error ?? "Müzik silinemedi.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.FilePath))
+        {
+            try
+            {
+                await _audioFileStorage.DeleteAsync(result.FilePath, CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+                    exception,
+                    "Silinen müziğin ses dosyası temizlenemedi: {FilePath}",
+                    result.FilePath);
+
+                TempData["Warning"] = "Müzik kaydı silindi ancak ses dosyası temizlenemedi.";
+
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        TempData["Success"] = "Müzik başarıyla silindi.";
+
+        return RedirectToAction(nameof(Index));
+    }
 }
