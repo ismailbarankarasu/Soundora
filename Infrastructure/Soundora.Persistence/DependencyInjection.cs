@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<ISubscriptionService, SubscriptionService>();
         services.AddScoped<IPlaybackAccessService, PlaybackAccessService>();
+        services.AddScoped<IPackageService, PackageService>();
         return services;
     }
 }
