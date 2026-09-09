@@ -1,0 +1,94 @@
+﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Subscriptions.Models.SubscriptionDto>
+
+@{
+    ViewData["Title"] = "Abonelik Yönetimi";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Yönetim Paneli</p>
+        <h2>Abonelikler</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">
+                @successMessage
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Abonelik Listesi</h4>
+
+            <a asp-area="Admin"
+               asp-controller="Subscriptions"
+               asp-action="Assign"
+               class="btn oneMusic-btn">
+                Paket Ata
+            </a>
+        </div>
+
+        <p class="text-muted">
+            Tarihler Türkiye saatine göre gösterilir.
+        </p>
+
+        @if (Model.Count == 0)
+        {
+            <div class="alert alert-info">
+                Henüz paket ataması yapılmadı.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Paket</th>
+                            <th>Başlangıç</th>
+                            <th>Bitiş</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var subscription in Model)
+                        {
+                            var startDate = subscription.StartDate
+                                .ToOffset(TimeSpan.FromHours(3))
+                                .ToString("dd.MM.yyyy HH:mm");
+
+                            var endDate = subscription.EndDate
+                                .ToOffset(TimeSpan.FromHours(3))
+                                .ToString("dd.MM.yyyy HH:mm");
+
+                            var badgeClass = subscription.Status == "Aktif"
+                                ? "badge-success"
+                                : subscription.Status == "Henüz başlamadı"
+                                    ? "badge-info"
+                                    : "badge-secondary";
+
+                            <tr>
+                                <td>@subscription.UserName</td>
+                                <td>@subscription.PackageName</td>
+                                <td>@startDate</td>
+                                <td>@endDate</td>
+                                <td>
+                                    <span class="badge @badgeClass">
+                                        @subscription.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</section>

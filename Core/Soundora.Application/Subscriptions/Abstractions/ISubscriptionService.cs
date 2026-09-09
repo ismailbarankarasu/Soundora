@@ -9,4 +9,5 @@ public interface ISubscriptionService
     Task<IReadOnlyList<SubscriptionPackageDto>> GetPackagesAsync(CancellationToken cancellationToken = default);
 
     Task<SubscriptionOperationResult> AssignAsync(AssignPackageRequest request, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SubscriptionDto>> GetAllAsync(CancellationToken cancellationToken = default);
 }

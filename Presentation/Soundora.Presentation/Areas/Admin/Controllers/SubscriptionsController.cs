@@ -19,6 +19,16 @@ public class SubscriptionsController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Index(
+    CancellationToken cancellationToken)
+    {
+        var subscriptions = await _subscriptionService.GetAllAsync(
+            cancellationToken);
+
+        return View(subscriptions);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Assign(CancellationToken cancellationToken)
     {
         var model = new AssignPackageViewModel();
@@ -54,7 +64,7 @@ public class SubscriptionsController : Controller
 
         TempData["Success"] = "Paket kullanıcıya başarıyla atandı.";
 
-        return RedirectToAction(nameof(Assign));
+        return RedirectToAction(nameof(Index));
     }
 
     private async Task PopulateListsAsync(AssignPackageViewModel model, CancellationToken cancellationToken)
@@ -81,4 +91,6 @@ public class SubscriptionsController : Controller
             })
             .ToList();
     }
+
+
 }
