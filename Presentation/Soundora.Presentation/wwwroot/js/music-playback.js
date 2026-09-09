@@ -7,7 +7,8 @@
 
     const buttons = document.querySelectorAll(".js-play-music");
 
-    if (!tokenForm || !panel || !host || buttons.length === 0) {
+    if (!tokenForm || !panel || !title ||
+        !message || !host || buttons.length === 0) {
         return;
     }
 
@@ -16,6 +17,7 @@
     player.preload = "none";
     player.style.width = "100%";
     player.hidden = true;
+
     host.appendChild(player);
 
     let objectUrl = null;
@@ -57,7 +59,12 @@
 
             panel.hidden = false;
             title.textContent = button.dataset.title;
-            showMessage("Müzik hazırlanıyor...", "info");
+            showMessage("Ses hazırlanıyor...", "info");
+
+            panel.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
 
             try {
                 const tokenResponse = await fetch(tokenForm.action, {
@@ -106,7 +113,7 @@
                 if (!audioResponse.ok) {
                     throw new Error(await readError(
                         audioResponse,
-                        "Müzik yüklenemedi."
+                        "Ses yüklenemedi."
                     ));
                 }
 
@@ -124,11 +131,11 @@
                 try {
                     await player.play();
 
-                    showMessage("Müzik oynatılıyor.", "success");
+                    showMessage("Oynatılıyor.", "success");
                 } catch (error) {
                     if (error.name === "NotAllowedError") {
                         showMessage(
-                            "Müzik hazır. Oynatıcıdaki başlat düğmesine basınız.",
+                            "Ses hazır. Oynatıcıdaki başlat düğmesine basınız.",
                             "info"
                         );
                     } else {
