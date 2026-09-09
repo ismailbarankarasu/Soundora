@@ -1,0 +1,99 @@
+﻿@model Soundora.Application.Subscriptions.Models.SubscriptionDto
+
+@{
+    ViewData["Title"] = "Aboneliğim";
+    Layout = "~/Views/Shared/_UI_Layout.cshtml";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Hesabım</p>
+        <h2>Aboneliğim</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+
+                @if (Model is null)
+                {
+                    <div class="alert alert-info">
+                        Henüz hesabınıza bir paket atanmadı.
+                        Müzik ve podcast dinlemek için paket ataması
+                        konusunda yöneticiyle iletişime geçebilirsiniz.
+                    </div>
+                }
+                else
+                {
+                    var startDate = Model.StartDate
+                        .ToOffset(TimeSpan.FromHours(3))
+                        .ToString("dd.MM.yyyy HH:mm");
+
+                    var endDate = Model.EndDate
+                        .ToOffset(TimeSpan.FromHours(3))
+                        .ToString("dd.MM.yyyy HH:mm");
+
+                    var badgeClass = Model.Status == "Aktif"
+                        ? "badge-success"
+                        : "badge-secondary";
+
+                    <h4 class="mb-4">Paket Bilgileriniz</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Kullanıcı</th>
+                                    <td>@Model.UserName</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Paket</th>
+                                    <td>@Model.PackageName</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Başlangıç</th>
+                                    <td>@startDate</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Bitiş</th>
+                                    <td>@endDate</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Durum</th>
+                                    <td>
+                                        <span class="badge @badgeClass">
+                                            @Model.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="text-muted">
+                        Tarihler Türkiye saatine göre gösterilir.
+                    </p>
+
+                    @if (Model.Status != "Aktif")
+                    {
+                        <div class="alert alert-warning">
+                            Bu abonelik şu anda dinleme erişimi sağlamıyor.
+                            Paket durumunuz için yöneticiyle iletişime geçebilirsiniz.
+                        </div>
+                    }
+                }
+
+                <a asp-area=""
+                   asp-controller="Home"
+                   asp-action="Index"
+                   class="btn oneMusic-btn mt-3">
+                    İçerikleri Keşfet
+                </a>
+
+            </div>
+        </div>
+    </div>
+</section>

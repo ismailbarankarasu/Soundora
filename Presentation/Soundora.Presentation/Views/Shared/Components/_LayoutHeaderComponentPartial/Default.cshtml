@@ -109,6 +109,16 @@
                                         </ul>
                                     </li>
                                 }
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <li>
+                                        <a asp-area=""
+                                           asp-controller="Subscription"
+                                           asp-action="Index">
+                                            Aboneliğim
+                                        </a>
+                                    </li>
+                                }
                             </ul>
 
                             <!-- Kullanıcı işlemleri -->

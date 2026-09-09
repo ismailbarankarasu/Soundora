@@ -10,4 +10,5 @@ public interface ISubscriptionService
 
     Task<SubscriptionOperationResult> AssignAsync(AssignPackageRequest request, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<SubscriptionDto>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<SubscriptionDto?> GetLatestForUserAsync(Guid userId, CancellationToken cancellationToken = default);
 }

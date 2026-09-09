@@ -178,4 +178,36 @@ public class SubscriptionService : ISubscriptionService
             })
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<SubscriptionDto?> GetLatestForUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        return await (
+            from subscription in _context.UserSubscriptions.AsNoTracking()
+            join user in _context.Users.AsNoTracking()
+                on subscription.UserId equals user.Id
+            where subscription.UserId == userId
+            orderby subscription.StartDate descending,
+                    subscription.Id descending
+            select new SubscriptionDto
+            {
+                Id = subscription.Id,
+                UserName = user.UserName ?? string.Empty,
+                PackageName = subscription.SubscriptionPackage.Name,
+                StartDate = subscription.StartDate,
+                EndDate = subscription.EndDate,
+
+                Status = !subscription.IsActive
+                    ? "Pasif"
+                    : subscription.EndDate <= now
+                        ? "Süresi dolmuş"
+                        : !subscription.SubscriptionPackage.IsActive
+                            ? "Paket pasif"
+                            : subscription.StartDate > now
+                                ? "Henüz başlamadı"
+                                : "Aktif"
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }
