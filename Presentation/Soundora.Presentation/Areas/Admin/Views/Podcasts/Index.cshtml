@@ -1,0 +1,86 @@
+﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Podcasts.Models.PodcastDto>
+
+@{
+    ViewData["Title"] = "Podcast Yönetimi";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Yönetim Paneli</p>
+        <h2>Podcastler</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">
+                @successMessage
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Podcast Listesi</h4>
+
+            <a asp-area="Admin"
+               asp-controller="Podcasts"
+               asp-action="Create"
+               class="btn oneMusic-btn">
+                Podcast Ekle
+            </a>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="alert alert-info">
+                Henüz podcast eklenmedi.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Podcast Adı</th>
+                            <th>Sunucu</th>
+                            <th>Kategori</th>
+                            <th>Süre</th>
+                            <th>Paket</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var podcast in Model)
+                        {
+                            var minutes = podcast.DurationInSeconds / 60;
+                            var seconds = podcast.DurationInSeconds % 60;
+                            var durationText = $"{minutes}:{seconds:D2}";
+
+                            <tr>
+                                <td>@podcast.Title</td>
+                                <td>@podcast.HostName</td>
+                                <td>@podcast.CategoryName</td>
+                                <td>@durationText</td>
+                                <td>
+                                    <span class="badge badge-warning">
+                                        Gold
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @(podcast.IsActive ? "badge-success" : "badge-secondary")">
+                                        @(podcast.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</section>

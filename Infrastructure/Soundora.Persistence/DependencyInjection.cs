@@ -7,6 +7,7 @@ using Soundora.Application.Categories.Abstractions;
 using Soundora.Application.Music.Abstractions;
 using Soundora.Application.Packages.Abstractions;
 using Soundora.Application.Playback.Abstractions;
+using Soundora.Application.Podcasts.Abstractions;
 using Soundora.Application.Subscriptions.Abstractions;
 using Soundora.Persistence.Contexts;
 using Soundora.Persistence.Identity;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<ISubscriptionService, SubscriptionService>();
         services.AddScoped<IPlaybackAccessService, PlaybackAccessService>();
         services.AddScoped<IPackageService, PackageService>();
+        services.AddScoped<IPodcastService, PodcastService>();
         return services;
     }
 }
