@@ -1,28 +1,75 @@
-﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Music.Models.LatestMusicDto>
+﻿@model Soundora.Application.Music.Models.MusicCatalogResult
 
-<section class="latest-albums-area section-padding-100">
+<section id="music-catalog"
+         class="latest-albums-area section-padding-100"
+         style="scroll-margin-top: 120px;">
     <div class="container">
 
         <div class="row">
             <div class="col-12">
                 <div class="section-heading style-2">
                     <p>Soundora’da yeni sesler keşfet</p>
-                    <h2>Son Eklenen Müzikler</h2>
+                    <h2>Müzikleri Keşfet</h2>
                 </div>
             </div>
         </div>
 
-        <div class="row justify-content-center">
+        <form asp-area=""
+              asp-controller="Home"
+              asp-action="Index"
+              asp-fragment="music-catalog"
+              method="get"
+              class="mb-4">
 
-            @if (Model.Count == 0)
+            <div class="row align-items-end">
+                <div class="col-12 col-md-8 mb-3">
+                    <label for="music-search">
+                        Müzik veya sanatçı ara
+                    </label>
+
+                    <input id="music-search"
+                           name="search"
+                           value="@Model.Search"
+                           maxlength="150"
+                           class="form-control"
+                           placeholder="Müzik veya sanatçı adı">
+                </div>
+
+                <div class="col-12 col-md-4 mb-3">
+                    <button type="submit"
+                            class="btn btn-dark">
+                        Ara
+                    </button>
+
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-fragment="music-catalog"
+                       class="btn btn-outline-secondary ml-2">
+                        Temizle
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <p class="text-muted">
+            Toplam @Model.TotalCount müzik
+        </p>
+
+        <div class="row justify-content-center">
+            @if (Model.Items.Count == 0)
             {
                 <div class="col-12 text-center">
-                    <p>Henüz müzik eklenmedi.</p>
+                    <div class="alert alert-info">
+                        @(string.IsNullOrWhiteSpace(Model.Search)
+                            ? "Henüz müzik eklenmedi."
+                            : "Aramanıza uygun müzik bulunamadı.")
+                    </div>
                 </div>
             }
             else
             {
-                @foreach (var music in Model)
+                @foreach (var music in Model.Items)
                 {
                     var coverImageUrl =
                         string.IsNullOrWhiteSpace(music.CoverImageUrl)
@@ -50,35 +97,75 @@
                                 <span class="badge @badgeClass">
                                     @music.AccessLevelName
                                 </span>
-                            </div>
-                            <div class="mt-3">
-                                @if (User.Identity?.IsAuthenticated == true)
-                                {
-                                    <button type="button"
-                                            class="btn btn-outline-dark btn-sm js-play-music"
-                                            data-playback-url="@Url.Action("Play", "Playback", new { area = "", id = music.Id })"
-                                            data-title="@music.Title">
-                                        <i class="fa fa-play" aria-hidden="true"></i>
-                                        Dinle
-                                    </button>
-                                }
-                                else
-                                {
-                                    <a asp-area=""
-                                       asp-controller="Account"
-                                       asp-action="Login"
-                                       asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
-                                       class="btn btn-outline-dark btn-sm">
-                                        Dinlemek İçin Giriş Yap
-                                    </a>
-                                }
+
+                                <div class="mt-3">
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-outline-dark btn-sm js-play-music"
+                                                data-playback-url="@Url.Action("Play", "Playback", new { area = "", id = music.Id })"
+                                                data-title="@music.Title">
+                                            <i class="fa fa-play"
+                                               aria-hidden="true"></i>
+                                            Dinle
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a asp-area=""
+                                           asp-controller="Account"
+                                           asp-action="Login"
+                                           asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "", search = Model.Search, page = Model.Page })"
+                                           class="btn btn-outline-dark btn-sm">
+                                            Dinlemek İçin Giriş Yap
+                                        </a>
+                                    }
+                                </div>
                             </div>
 
                         </div>
                     </div>
                 }
             }
-
         </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Müzik sayfaları"
+                 class="d-flex justify-content-center align-items-center mt-4">
+
+                @if (Model.Page > 1)
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-search="@Model.Search"
+                       asp-route-page="@(Model.Page - 1)"
+                       asp-fragment="music-catalog"
+                       class="btn btn-outline-dark">
+                        Önceki
+                    </a>
+                }
+
+                <span class="mx-3">
+                    Sayfa @Model.Page / @Model.TotalPages
+                </span>
+
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-search="@Model.Search"
+                       asp-route-page="@(Model.Page + 1)"
+                       asp-fragment="music-catalog"
+                       class="btn btn-outline-dark">
+                        Sonraki
+                    </a>
+                }
+
+            </nav>
+        }
+
     </div>
 </section>

@@ -1,6 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Ana Sayfa";
     Layout = "~/Views/Shared/_UI_Layout.cshtml";
+
+    var musicSearch = Context.Request.Query["search"].ToString();
+
+    var musicPage = int.TryParse(
+        Context.Request.Query["page"].ToString(),
+        out var requestedPage)
+            ? requestedPage
+            : 1;
 }
 
 @if (User.Identity?.IsAuthenticated == true)
@@ -16,7 +24,12 @@
 
 @await Component.InvokeAsync("_HomeSliderComponentPartial")
 
-@await Component.InvokeAsync("_HomeLatestMusicComponentPartial")
+@await Component.InvokeAsync("_HomeLatestMusicComponentPartial",
+    new
+    {
+        search = musicSearch,
+        page = musicPage
+    })
 
 @await Component.InvokeAsync("_HomeLatestPodcastComponentPartial")
 

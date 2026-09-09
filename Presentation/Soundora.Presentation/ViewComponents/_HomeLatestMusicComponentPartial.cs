@@ -7,16 +7,15 @@ public class _HomeLatestMusicComponentPartial : ViewComponent
 {
     private readonly IMusicService _musicService;
 
-    public _HomeLatestMusicComponentPartial(
-        IMusicService musicService)
+    public _HomeLatestMusicComponentPartial(IMusicService musicService)
     {
         _musicService = musicService;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync()
+    public async Task<IViewComponentResult> InvokeAsync(string? search = null, int page = 1)
     {
-        var musicList = await _musicService.GetLatestAsync(HttpContext.RequestAborted);
+        var result = await _musicService.GetCatalogAsync(search, page, HttpContext.RequestAborted);
 
-        return View(musicList);
+        return View(result);
     }
 }
