@@ -306,4 +306,44 @@ public class PodcastsController : Controller
             })
             .ToList();
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _podcastService.DeleteAsync(id, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            TempData["Error"] = result.Error ?? "Podcast silinemedi.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.FilePath))
+        {
+            try
+            {
+                await _audioFileStorage.DeleteAsync(
+                    result.FilePath,
+                    CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+                    exception,
+                    "Silinen podcast'in ses dosyası temizlenemedi: {FilePath}",
+                    result.FilePath);
+
+                TempData["Warning"] =
+                    "Podcast kaydı silindi ancak ses dosyası temizlenemedi.";
+
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        TempData["Success"] = "Podcast başarıyla silindi.";
+
+        return RedirectToAction(nameof(Index));
+    }
 }

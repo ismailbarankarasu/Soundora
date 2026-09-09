@@ -259,4 +259,34 @@ public class PodcastService : IPodcastService
             Id = podcast.Id
         };
     }
+
+    public async Task<DeletePodcastResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var podcast = await _context.AudioContents
+            .FirstOrDefaultAsync(
+                x => x.Id == id &&
+                     x.ContentType == ContentType.Podcast,
+                cancellationToken);
+
+        if (podcast is null)
+        {
+            return new DeletePodcastResult
+            {
+                Succeeded = false,
+                Error = "Podcast bulunamadı."
+            };
+        }
+
+        var filePath = podcast.FilePath;
+
+        _context.AudioContents.Remove(podcast);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new DeletePodcastResult
+        {
+            Succeeded = true,
+            FilePath = filePath
+        };
+    }
 }
