@@ -6,5 +6,6 @@ public enum PlaybackAccessStatus
     UserNotFound = 2,
     ContentNotFound = 3,
     SubscriptionRequired = 4,
-    UpgradeRequired = 5
+    UpgradeRequired = 5,
+    TokenOutdated = 6
 }

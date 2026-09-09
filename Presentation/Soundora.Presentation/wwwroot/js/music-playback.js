@@ -105,9 +105,10 @@
                 );
 
                 if (audioResponse.status === 401) {
-                    throw new Error(
-                        "Oynatma yetkisi doğrulanamadı. Tekrar deneyiniz."
-                    );
+                    throw new Error(await readError(
+                        audioResponse,
+                        "Oynatma yetkisi doğrulanamadı. Dinle butonuna tekrar basınız."
+                    ));
                 }
 
                 if (!audioResponse.ok) {

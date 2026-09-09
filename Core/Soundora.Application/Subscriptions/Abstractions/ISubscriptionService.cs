@@ -1,4 +1,5 @@
-﻿using Soundora.Application.Subscriptions.Models;
+﻿using Soundora.Application.Authentication.Models;
+using Soundora.Application.Subscriptions.Models;
 
 namespace Soundora.Application.Subscriptions.Abstractions;
 
@@ -11,4 +12,5 @@ public interface ISubscriptionService
     Task<SubscriptionOperationResult> AssignAsync(AssignPackageRequest request, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<SubscriptionDto>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<SubscriptionDto?> GetLatestForUserAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<JwtSubscriptionInfo?> GetActiveForTokenAsync(Guid userId, CancellationToken cancellationToken = default);
 }

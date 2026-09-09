@@ -10,4 +10,6 @@ public class JwtUserInfo
 
     public IReadOnlyCollection<string> Roles { get; init; }
         = Array.Empty<string>();
+
+    public JwtSubscriptionInfo? Subscription { get; init; }
 }

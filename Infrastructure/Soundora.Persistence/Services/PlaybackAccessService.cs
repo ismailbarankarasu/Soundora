@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Soundora.Application.Authentication.Models;
 using Soundora.Application.Playback.Abstractions;
 using Soundora.Application.Playback.Models;
+using Soundora.Application.Subscriptions.Abstractions;
 using Soundora.Domain.Enums;
 using Soundora.Persistence.Contexts;
 
@@ -9,19 +11,19 @@ namespace Soundora.Persistence.Services;
 public class PlaybackAccessService : IPlaybackAccessService
 {
     private readonly AppDbContext _context;
+    private readonly ISubscriptionService _subscriptionService;
 
-    public PlaybackAccessService(AppDbContext context)
+    public PlaybackAccessService(AppDbContext context, ISubscriptionService subscriptionService)
     {
         _context = context;
+        _subscriptionService = subscriptionService;
     }
 
-    public async Task<PlaybackAccessResult> CheckAsync(Guid userId, Guid contentId, CancellationToken cancellationToken = default)
+    public async Task<PlaybackAccessResult> CheckAsync(Guid userId, Guid contentId, JwtSubscriptionInfo? tokenSubscription, CancellationToken cancellationToken = default)
     {
         var userExists = await _context.Users
             .AsNoTracking()
-            .AnyAsync(
-                x => x.Id == userId,
-                cancellationToken);
+            .AnyAsync(x => x.Id == userId, cancellationToken);
 
         if (!userExists)
         {
@@ -59,22 +61,12 @@ public class PlaybackAccessService : IPlaybackAccessService
             };
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var currentSubscription =
+            await _subscriptionService.GetActiveForTokenAsync(
+                userId,
+                cancellationToken);
 
-        var activeLevels = await _context.UserSubscriptions
-            .AsNoTracking()
-            .Where(x =>
-                x.UserId == userId &&
-                x.IsActive &&
-                x.StartDate <= now &&
-                x.EndDate > now &&
-                x.SubscriptionPackage.IsActive &&
-                (x.SubscriptionPackage.AccessLevel == AccessLevel.Basic ||
-                 x.SubscriptionPackage.AccessLevel == AccessLevel.Gold))
-            .Select(x => x.SubscriptionPackage.AccessLevel)
-            .ToListAsync(cancellationToken);
-
-        if (activeLevels.Count == 0)
+        if (currentSubscription is null)
         {
             return new PlaybackAccessResult
             {
@@ -83,10 +75,33 @@ public class PlaybackAccessService : IPlaybackAccessService
             };
         }
 
-        var hasAccess = activeLevels.Any(level =>
-            level == AccessLevel.Gold ||
-            (level == AccessLevel.Basic &&
-             content.RequiredAccessLevel == AccessLevel.Basic));
+        if (tokenSubscription is null ||
+            tokenSubscription.SubscriptionId != currentSubscription.SubscriptionId ||
+            tokenSubscription.PackageId != currentSubscription.PackageId ||
+            tokenSubscription.AccessLevel != currentSubscription.AccessLevel ||
+            tokenSubscription.ExpiresAtUtc.ToUnixTimeSeconds() !=
+                currentSubscription.ExpiresAtUtc.ToUnixTimeSeconds())
+        {
+            return new PlaybackAccessResult
+            {
+                Status = PlaybackAccessStatus.TokenOutdated,
+                Error = "Paket bilgileriniz değişmiş. Dinle butonuna tekrar basınız."
+            };
+        }
+
+        if (tokenSubscription.ExpiresAtUtc <= DateTimeOffset.UtcNow)
+        {
+            return new PlaybackAccessResult
+            {
+                Status = PlaybackAccessStatus.SubscriptionRequired,
+                Error = "Aboneliğinizin süresi dolmuş."
+            };
+        }
+
+        var hasAccess =
+            tokenSubscription.AccessLevel == AccessLevel.Gold ||
+            (tokenSubscription.AccessLevel == AccessLevel.Basic &&
+             content.RequiredAccessLevel == AccessLevel.Basic);
 
         if (!hasAccess)
         {

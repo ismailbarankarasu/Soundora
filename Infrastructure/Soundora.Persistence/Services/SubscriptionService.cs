@@ -1,10 +1,11 @@
-﻿using System.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Soundora.Application.Authentication.Models;
 using Soundora.Application.Subscriptions.Abstractions;
 using Soundora.Application.Subscriptions.Models;
 using Soundora.Domain.Entities;
 using Soundora.Domain.Enums;
 using Soundora.Persistence.Contexts;
+using System.Data;
 
 namespace Soundora.Persistence.Services;
 
@@ -207,6 +208,33 @@ public class SubscriptionService : ISubscriptionService
                             : subscription.StartDate > now
                                 ? "Henüz başlamadı"
                                 : "Aktif"
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<JwtSubscriptionInfo?> GetActiveForTokenAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        return await _context.UserSubscriptions
+            .AsNoTracking()
+            .Where(x =>
+                x.UserId == userId &&
+                x.IsActive &&
+                x.StartDate <= now &&
+                x.EndDate > now &&
+                x.SubscriptionPackage.IsActive &&
+                (x.SubscriptionPackage.AccessLevel == AccessLevel.Basic ||
+                 x.SubscriptionPackage.AccessLevel == AccessLevel.Gold))
+            .OrderByDescending(x => x.SubscriptionPackage.AccessLevel)
+            .ThenByDescending(x => x.StartDate)
+            .ThenByDescending(x => x.Id)
+            .Select(x => new JwtSubscriptionInfo
+            {
+                SubscriptionId = x.Id,
+                PackageId = x.SubscriptionPackageId,
+                AccessLevel = x.SubscriptionPackage.AccessLevel,
+                ExpiresAtUtc = x.EndDate
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
