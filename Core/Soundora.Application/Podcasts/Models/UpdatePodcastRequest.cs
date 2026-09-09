@@ -23,4 +23,5 @@ public class UpdatePodcastRequest
     public Guid? ArtistId { get; set; }
 
     public bool IsActive { get; set; }
+    public string? CoverImagePath { get; set; }
 }

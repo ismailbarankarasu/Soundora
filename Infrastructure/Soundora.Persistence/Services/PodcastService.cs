@@ -162,7 +162,8 @@ public class PodcastService : IPodcastService
                 Description = x.Description,
                 CategoryId = x.CategoryId,
                 ArtistId = x.ArtistId,
-                IsActive = x.IsActive
+                IsActive = x.IsActive,
+                CoverImagePath = x.CoverImagePath,
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -249,6 +250,15 @@ public class PodcastService : IPodcastService
         podcast.IsActive = request.IsActive;
         podcast.RequiredAccessLevel = AccessLevel.Gold;
 
+        string? previousCoverImagePath = null;
+
+        if (!string.IsNullOrWhiteSpace(request.CoverImagePath) &&
+            request.CoverImagePath != podcast.CoverImagePath)
+        {
+            previousCoverImagePath = podcast.CoverImagePath;
+            podcast.CoverImagePath = request.CoverImagePath;
+        }
+
         podcast.MarkAsUpdated();
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -256,7 +266,8 @@ public class PodcastService : IPodcastService
         return new PodcastOperationResult
         {
             Succeeded = true,
-            Id = podcast.Id
+            Id = podcast.Id,
+            PreviousCoverImagePath = previousCoverImagePath
         };
     }
 
@@ -278,6 +289,7 @@ public class PodcastService : IPodcastService
         }
 
         var filePath = podcast.FilePath;
+        var coverImagePath = podcast.CoverImagePath;
 
         _context.AudioContents.Remove(podcast);
 
@@ -286,7 +298,8 @@ public class PodcastService : IPodcastService
         return new DeletePodcastResult
         {
             Succeeded = true,
-            FilePath = filePath
+            FilePath = filePath,
+            CoverImagePath = coverImagePath
         };
     }
 

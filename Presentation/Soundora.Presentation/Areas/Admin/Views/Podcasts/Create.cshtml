@@ -90,6 +90,23 @@
                               class="text-danger"></span>
                     </div>
 
+                    <div class="form-group">
+                        <label asp-for="CoverImage">Kapak Görseli</label>
+
+                        <input asp-for="CoverImage"
+                               type="file"
+                               accept=".jpg,.jpeg,.png"
+                               class="form-control-file">
+
+                        <small class="form-text text-muted">
+                            İsteğe bağlıdır. JPG veya PNG, en fazla 5 MB.
+                            Hata sonrası dosyaları yeniden seçiniz.
+                        </small>
+
+                        <span asp-validation-for="CoverImage"
+                              class="text-danger"></span>
+                    </div>
+
                     <button type="submit" class="btn oneMusic-btn">
                         Kaydet
                     </button>

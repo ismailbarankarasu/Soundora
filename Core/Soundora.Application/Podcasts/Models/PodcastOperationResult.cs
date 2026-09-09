@@ -7,4 +7,5 @@ public class PodcastOperationResult
     public Guid? Id { get; init; }
 
     public string? Error { get; init; }
+    public string? PreviousCoverImagePath { get; init; }
 }
