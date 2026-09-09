@@ -1,28 +1,100 @@
-﻿@model System.Collections.Generic.IReadOnlyList<Soundora.Application.Podcasts.Models.PodcastDto>
+﻿@model Soundora.Application.Podcasts.Models.PodcastCatalogResult
 
-<section class="latest-albums-area section-padding-100 bg-gray">
+@{
+    var musicSearch = Context.Request.Query["search"].ToString();
+    var musicPage = Context.Request.Query["page"].ToString();
+
+    var returnUrl = Url.Action("Index", "Home", new
+    {
+        area = "",
+        search = musicSearch,
+        page = musicPage,
+        podcastSearch = Model.Search,
+        podcastPage = Model.Page
+    });
+}
+
+<section id="podcast-catalog"
+         class="latest-albums-area section-padding-100 bg-gray"
+         style="scroll-margin-top: 120px;">
     <div class="container">
 
         <div class="row">
             <div class="col-12">
                 <div class="section-heading style-2">
                     <p>Yeni konular, yeni sesler</p>
-                    <h2>Son Eklenen Podcastler</h2>
+                    <h2>Podcastleri Keşfet</h2>
                 </div>
             </div>
         </div>
 
-        <div class="row justify-content-center">
+        <form asp-area=""
+              asp-controller="Home"
+              asp-action="Index"
+              asp-fragment="podcast-catalog"
+              method="get"
+              class="mb-4">
 
-            @if (Model.Count == 0)
+            <!-- Müzik bölümünün mevcut filtresini koru -->
+            <input type="hidden"
+                   name="search"
+                   value="@musicSearch">
+
+            <input type="hidden"
+                   name="page"
+                   value="@musicPage">
+
+            <div class="row align-items-end">
+                <div class="col-12 col-md-8 mb-3">
+                    <label for="podcast-search">
+                        Podcast veya sunucu ara
+                    </label>
+
+                    <input id="podcast-search"
+                           name="podcastSearch"
+                           value="@Model.Search"
+                           maxlength="150"
+                           class="form-control"
+                           placeholder="Podcast veya sunucu adı">
+                </div>
+
+                <div class="col-12 col-md-4 mb-3">
+                    <button type="submit"
+                            class="btn btn-dark">
+                        Ara
+                    </button>
+
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-search="@musicSearch"
+                       asp-route-page="@musicPage"
+                       asp-fragment="podcast-catalog"
+                       class="btn btn-outline-secondary ml-2">
+                        Temizle
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <p class="text-muted">
+            Toplam @Model.TotalCount podcast
+        </p>
+
+        <div class="row justify-content-center">
+            @if (Model.Items.Count == 0)
             {
-                <div class="col-12 text-center">
-                    <p>Henüz podcast eklenmedi.</p>
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        @(string.IsNullOrWhiteSpace(Model.Search)
+                            ? "Henüz podcast eklenmedi."
+                            : "Aramanıza uygun podcast bulunamadı.")
+                    </div>
                 </div>
             }
             else
             {
-                @foreach (var podcast in Model)
+                @foreach (var podcast in Model.Items)
                 {
                     var coverImageUrl =
                         string.IsNullOrWhiteSpace(podcast.CoverImageUrl)
@@ -69,7 +141,7 @@
                                         <a asp-area=""
                                            asp-controller="Account"
                                            asp-action="Login"
-                                           asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                                           asp-route-returnUrl="@returnUrl"
                                            class="btn btn-outline-dark btn-sm">
                                             Dinlemek İçin Giriş Yap
                                         </a>
@@ -81,8 +153,49 @@
                     </div>
                 }
             }
-
         </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Podcast sayfaları"
+                 class="d-flex justify-content-center align-items-center mt-4">
+
+                @if (Model.Page > 1)
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-search="@musicSearch"
+                       asp-route-page="@musicPage"
+                       asp-route-podcastSearch="@Model.Search"
+                       asp-route-podcastPage="@(Model.Page - 1)"
+                       asp-fragment="podcast-catalog"
+                       class="btn btn-outline-dark">
+                        Önceki
+                    </a>
+                }
+
+                <span class="mx-3">
+                    Sayfa @Model.Page / @Model.TotalPages
+                </span>
+
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index"
+                       asp-route-search="@musicSearch"
+                       asp-route-page="@musicPage"
+                       asp-route-podcastSearch="@Model.Search"
+                       asp-route-podcastPage="@(Model.Page + 1)"
+                       asp-fragment="podcast-catalog"
+                       class="btn btn-outline-dark">
+                        Sonraki
+                    </a>
+                }
+
+            </nav>
+        }
 
     </div>
 </section>

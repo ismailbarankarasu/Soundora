@@ -6,8 +6,16 @@
 
     var musicPage = int.TryParse(
         Context.Request.Query["page"].ToString(),
-        out var requestedPage)
-            ? requestedPage
+        out var requestedMusicPage)
+            ? requestedMusicPage
+            : 1;
+
+    var podcastSearch = Context.Request.Query["podcastSearch"].ToString();
+
+    var podcastPage = int.TryParse(
+        Context.Request.Query["podcastPage"].ToString(),
+        out var requestedPodcastPage)
+            ? requestedPodcastPage
             : 1;
 }
 
@@ -31,8 +39,12 @@
         page = musicPage
     })
 
-@await Component.InvokeAsync("_HomeLatestPodcastComponentPartial")
-
+@await Component.InvokeAsync("_HomeLatestPodcastComponentPartial",
+    new
+    {
+        search = podcastSearch,
+        page = podcastPage
+    })
 <div class="container">
     <div id="musicPlaybackPanel" class="my-5" hidden>
         <h5 id="playingMusicTitle"></h5>

@@ -289,4 +289,58 @@ public class PodcastService : IPodcastService
             FilePath = filePath
         };
     }
+
+    public async Task<PodcastCatalogResult> GetCatalogAsync(string? search, int page = 1, CancellationToken cancellationToken = default)
+    {
+        const int pageSize = 6;
+
+        search = string.IsNullOrWhiteSpace(search)
+            ? null
+            : search.Trim();
+
+        if (search is not null && search.Length > 150)
+        {
+            search = search[..150];
+        }
+
+        var query = _context.AudioContents
+            .AsNoTracking()
+            .Where(x =>
+                x.ContentType == ContentType.Podcast &&
+                x.IsActive &&
+                x.Category.IsActive);
+
+        if (search is not null)
+        {
+            query = query.Where(x =>
+                x.Title.Contains(search) ||
+                (x.Artist != null && x.Artist.Name.Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var totalPages = Math.Max(
+            1,
+            (int)Math.Ceiling((double)totalCount / pageSize));
+
+        page = Math.Clamp(page, 1, totalPages);
+
+        var pagedQuery = query
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
+
+        var items = await ProjectToDto(pagedQuery)
+            .ToListAsync(cancellationToken);
+
+        return new PodcastCatalogResult
+        {
+            Items = items,
+            Search = search,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
 }

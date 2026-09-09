@@ -12,9 +12,10 @@ public class _HomeLatestPodcastComponentPartial : ViewComponent
         _podcastService = podcastService;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync()
+    public async Task<IViewComponentResult> InvokeAsync(string? search = null, int page = 1)
     {
-        var podcasts = await _podcastService.GetLatestAsync(HttpContext.RequestAborted);
-        return View(podcasts);
+        var result = await _podcastService.GetCatalogAsync(search, page, HttpContext.RequestAborted);
+
+        return View(result);
     }
 }

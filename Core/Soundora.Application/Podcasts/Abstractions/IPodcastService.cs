@@ -13,4 +13,5 @@ public interface IPodcastService
 
     Task<PodcastOperationResult> UpdateAsync(UpdatePodcastRequest request, CancellationToken cancellationToken = default);
     Task<DeletePodcastResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<PodcastCatalogResult> GetCatalogAsync(string? search, int page = 1, CancellationToken cancellationToken = default);
 }
