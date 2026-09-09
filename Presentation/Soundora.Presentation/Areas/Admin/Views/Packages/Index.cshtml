@@ -1,0 +1,114 @@
+﻿@model System.Collections.Generic.IReadOnlyList<PackageDto>
+
+@{
+    ViewData["Title"] = "Paket Yönetimi";
+}
+
+<section class="breadcumb-area bg-img bg-overlay"
+         style="background-image: url('@Url.Content("~/one-music-gh-pages/img/bg-img/bg-2.jpg")');">
+    <div class="bradcumbContent">
+        <p>Yönetim Paneli</p>
+        <h2>Paketler</h2>
+    </div>
+</section>
+
+<section class="section-padding-100">
+    <div class="container">
+
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">
+                @successMessage
+            </div>
+        }
+        @if (TempData["Error"] is string errorMessage)
+        {
+            <div class="alert alert-danger" role="alert">
+                @errorMessage
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Paket Listesi</h4>
+
+            <a asp-area="Admin"
+               asp-controller="Packages"
+               asp-action="Create"
+               class="btn oneMusic-btn">
+                Paket Ekle
+            </a>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="alert alert-info">
+                Henüz paket eklenmedi.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Paket Adı</th>
+                            <th>Açıklama</th>
+                            <th>Fiyat</th>
+                            <th>Süre</th>
+                            <th>Erişim Seviyesi</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var package in Model)
+                        {
+                            <tr>
+                                <td>@package.Name</td>
+                                <td>@(package.Description ?? "-")</td>
+                                <td>
+                                    @package.Price.ToString("N2") TL
+                                </td>
+                                <td>@package.DurationInDays gün</td>
+                                <td>@package.AccessLevel</td>
+                                <td>
+                                    <span class="badge @(package.IsActive ? "badge-success" : "badge-secondary")">
+                                        @(package.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+
+                                        <a asp-area="Admin"
+                                           asp-controller="Packages"
+                                           asp-action="Edit"
+                                           asp-route-id="@package.Id"
+                                           class="btn btn-outline-primary btn-sm">
+                                            Güncelle
+                                        </a>
+
+                                        <form asp-area="Admin"
+                                              asp-controller="Packages"
+                                              asp-action="Delete"
+                                              asp-route-id="@package.Id"
+                                              method="post"
+                                              style="margin: 0;"
+                                              onsubmit="return confirm('Bu paketi silmek istediğinize emin misiniz?');">
+
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                Sil
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</section>

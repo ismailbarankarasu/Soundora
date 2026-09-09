@@ -365,3 +365,7 @@ FodyWeavers.xsd
 # Track application package management source files
 !**/Soundora.Application/Packages/
 !**/Soundora.Application/Packages/**
+
+# Track admin package views
+!**/Soundora.Presentation/Areas/Admin/Views/Packages/
+!**/Soundora.Presentation/Areas/Admin/Views/Packages/**
