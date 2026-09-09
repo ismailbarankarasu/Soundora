@@ -52,4 +52,53 @@ public class PackagesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(
+    Guid id,
+    CancellationToken cancellationToken)
+    {
+        var model = await _packageService.GetForUpdateAsync(
+            id,
+            cancellationToken);
+
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, UpdatePackageRequest request, CancellationToken cancellationToken)
+    {
+        if (id != request.Id)
+        {
+            return BadRequest();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(request);
+        }
+
+        var result = await _packageService.UpdateAsync(
+            request,
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                result.Error ?? "Paket güncellenemedi.");
+
+            return View(request);
+        }
+
+        TempData["Success"] = "Paket başarıyla güncellendi.";
+
+        return RedirectToAction(nameof(Index));
+    }
 }

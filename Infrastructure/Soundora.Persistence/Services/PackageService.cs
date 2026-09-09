@@ -103,4 +103,101 @@ public class PackageService : IPackageService
             Succeeded = true
         };
     }
+
+    public async Task<UpdatePackageRequest?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.SubscriptionPackages
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new UpdatePackageRequest
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                Price = x.Price,
+                DurationInDays = x.DurationInDays,
+                AccessLevel = x.AccessLevel,
+                IsActive = x.IsActive
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<PackageOperationResult> UpdateAsync(UpdatePackageRequest request, CancellationToken cancellationToken = default)
+    {
+        var validationResults = new List<ValidationResult>();
+
+        var isValid = Validator.TryValidateObject(
+            request,
+            new ValidationContext(request),
+            validationResults,
+            validateAllProperties: true);
+
+        if (!isValid)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = validationResults[0].ErrorMessage
+            };
+        }
+
+        if (decimal.Round(request.Price, 2) != request.Price)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = "Fiyat en fazla iki ondalık basamak içerebilir."
+            };
+        }
+
+        var package = await _context.SubscriptionPackages
+            .FirstOrDefaultAsync(
+                x => x.Id == request.Id,
+                cancellationToken);
+
+        if (package is null)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = "Paket bulunamadı."
+            };
+        }
+
+        var name = request.Name.Trim();
+
+        var exists = await _context.SubscriptionPackages
+            .AnyAsync(
+                x => x.Name == name && x.Id != request.Id,
+                cancellationToken);
+
+        if (exists)
+        {
+            return new PackageOperationResult
+            {
+                Succeeded = false,
+                Error = "Bu isimde başka bir paket mevcut."
+            };
+        }
+
+        package.Name = name;
+
+        package.Description = string.IsNullOrWhiteSpace(request.Description)
+            ? null
+            : request.Description.Trim();
+
+        package.Price = request.Price;
+        package.DurationInDays = request.DurationInDays;
+        package.AccessLevel = request.AccessLevel;
+        package.IsActive = request.IsActive;
+
+        package.MarkAsUpdated();
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new PackageOperationResult
+        {
+            Succeeded = true
+        };
+    }
 }
