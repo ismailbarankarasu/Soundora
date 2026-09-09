@@ -379,6 +379,13 @@ public class MusicService : IMusicService
         music.RequiredAccessLevel = request.RequiredAccessLevel;
         music.IsActive = request.IsActive;
 
+        string? previousCoverImagePath = null;
+
+        if (!string.IsNullOrWhiteSpace(request.CoverImagePath) && request.CoverImagePath != music.CoverImagePath)
+        {
+            previousCoverImagePath = music.CoverImagePath;
+            music.CoverImagePath = request.CoverImagePath;
+        }
         music.MarkAsUpdated();
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -386,7 +393,8 @@ public class MusicService : IMusicService
         return new MusicOperationResult
         {
             Succeeded = true,
-            Id = music.Id
+            Id = music.Id,
+            PreviousCoverImagePath = previousCoverImagePath
         };
     }
 }

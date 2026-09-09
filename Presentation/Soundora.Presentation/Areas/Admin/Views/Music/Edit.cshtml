@@ -21,7 +21,8 @@
                       asp-controller="Music"
                       asp-action="Edit"
                       asp-route-id="@Model.Input.Id"
-                      method="post">
+                      method="post"
+                      enctype="multipart/form-data">
 
                     <input asp-for="Input.Id" type="hidden">
 
@@ -89,7 +90,33 @@
                         <span asp-validation-for="Input.RequiredAccessLevel"
                               class="text-danger"></span>
                     </div>
+                    <div class="form-group">
+                        @if (!string.IsNullOrWhiteSpace(Model.Input.CoverImagePath))
+                        {
+                            <div class="mb-3">
+                                <p>Mevcut Kapak</p>
 
+                                <img src="@Url.Content(Model.Input.CoverImagePath)"
+                                     alt="Mevcut müzik kapağı"
+                                     style="width: 180px; height: 180px; object-fit: cover;">
+                            </div>
+                        }
+
+                        <label asp-for="CoverImage">Yeni Kapak Görseli</label>
+
+                        <input asp-for="CoverImage"
+                               type="file"
+                               accept=".jpg,.jpeg,.png"
+                               class="form-control-file">
+
+                        <small class="form-text text-muted">
+                            JPG veya PNG, en fazla 5 MB.
+                            Yeni görsel seçmezseniz mevcut kapak korunur.
+                        </small>
+
+                        <span asp-validation-for="CoverImage"
+                              class="text-danger"></span>
+                    </div>
                     <div class="form-group form-check">
                         <input asp-for="Input.IsActive"
                                class="form-check-input">

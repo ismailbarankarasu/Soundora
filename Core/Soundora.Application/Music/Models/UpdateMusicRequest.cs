@@ -27,4 +27,5 @@ public class UpdateMusicRequest
     public AccessLevel RequiredAccessLevel { get; set; }
 
     public bool IsActive { get; set; }
+    public string? CoverImagePath { get; set; }
 }

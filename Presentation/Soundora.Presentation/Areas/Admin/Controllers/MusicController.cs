@@ -56,9 +56,7 @@ public class MusicController : Controller
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(30 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 30 * 1024 * 1024)]
-    public async Task<IActionResult> Create(
-    CreateMusicViewModel model,
-    CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateMusicViewModel model, CancellationToken cancellationToken)
     {
         if (model.AudioFile is not null)
         {
@@ -294,27 +292,45 @@ public class MusicController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(
-        Guid id,
-        UpdateMusicViewModel model,
-        CancellationToken cancellationToken)
+    [RequestSizeLimit(7 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 7 * 1024 * 1024)]
+    public async Task<IActionResult> Edit(Guid id, UpdateMusicViewModel model, CancellationToken cancellationToken)
     {
         if (id != model.Input.Id)
         {
             return BadRequest();
         }
 
-        var currentMusic = await _musicService.GetForUpdateAsync(
-            id,
-            cancellationToken);
+        var currentMusic = await _musicService.GetForUpdateAsync(id, cancellationToken);
 
         if (currentMusic is null)
         {
             return NotFound();
         }
 
+        model.Input.CoverImagePath = null;
+        ModelState.Remove("Input.CoverImagePath");
+
+        if (model.CoverImage is not null)
+        {
+            if (model.CoverImage.Length == 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.CoverImage),
+                    "Boş kapak görseli yükleyemezsiniz.");
+            }
+            else if (model.CoverImage.Length > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(
+                    nameof(model.CoverImage),
+                    "Kapak görseli en fazla 5 MB olabilir.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
+            model.Input.CoverImagePath = currentMusic.CoverImagePath;
+
             await PopulateEditListsAsync(
                 model,
                 currentMusic.CategoryId,
@@ -324,28 +340,115 @@ public class MusicController : Controller
             return View(model);
         }
 
-        var result = await _musicService.UpdateAsync(
-            model.Input,
-            cancellationToken);
+        string? newCoverPath = null;
+        var savingRecord = false;
 
-        if (!result.Succeeded)
+        try
         {
+            if (model.CoverImage is not null)
+            {
+                await using var stream = model.CoverImage.OpenReadStream();
+
+                var storedCover = await _coverFileStorage.SaveAsync(
+                    stream,
+                    model.CoverImage.FileName,
+                    cancellationToken);
+
+                newCoverPath = storedCover.FilePath;
+            }
+
+            model.Input.CoverImagePath = newCoverPath;
+            savingRecord = true;
+
+            var result = await _musicService.UpdateAsync(
+                model.Input,
+                cancellationToken);
+
+            if (!result.Succeeded)
+            {
+                savingRecord = false;
+
+                await CleanupCoverAsync(newCoverPath);
+                newCoverPath = null;
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Error ?? "Müzik güncellenemedi.");
+            }
+            else
+            {
+                newCoverPath = null;
+
+                if (!string.IsNullOrWhiteSpace(result.PreviousCoverImagePath))
+                {
+                    try
+                    {
+                        await _coverFileStorage.DeleteAsync(
+                            result.PreviousCoverImagePath,
+                            CancellationToken.None);
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogError(
+                            exception,
+                            "Önceki müzik kapağı temizlenemedi: {FilePath}",
+                            result.PreviousCoverImagePath);
+
+                        TempData["Warning"] =
+                            "Müzik güncellendi ancak eski kapak dosyası temizlenemedi.";
+                    }
+                }
+
+                TempData["Success"] = "Müzik başarıyla güncellendi.";
+
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        catch (InvalidDataException exception) when (!savingRecord)
+        {
+            await CleanupCoverAsync(newCoverPath);
+
+            ModelState.AddModelError(nameof(model.CoverImage), exception.Message);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            if (!savingRecord)
+            {
+                await CleanupCoverAsync(newCoverPath);
+            }
+
+            throw;
+        }
+        catch (Exception exception)
+        {
+            if (!savingRecord)
+            {
+                await CleanupCoverAsync(newCoverPath);
+            }
+
+            _logger.LogError(
+                exception,
+                "Müzik güncellenemedi. Müzik: {MusicId}, Kapak: {CoverPath}",
+                id,
+                newCoverPath);
+
             ModelState.AddModelError(
                 string.Empty,
-                result.Error ?? "Müzik güncellenemedi.");
-
-            await PopulateEditListsAsync(
-                model,
-                currentMusic.CategoryId,
-                currentMusic.ArtistId,
-                cancellationToken);
-
-            return View(model);
+                savingRecord
+                    ? "İşlem sonucu doğrulanamadı. Tekrar denemeden önce müzik listesini kontrol edin."
+                    : "Kapak yüklenemedi. Lütfen tekrar deneyiniz.");
         }
 
-        TempData["Success"] = "Müzik başarıyla güncellendi.";
+        model.Input.CoverImagePath = currentMusic.CoverImagePath;
 
-        return RedirectToAction(nameof(Index));
+        await PopulateEditListsAsync(
+            model,
+            currentMusic.CategoryId,
+            currentMusic.ArtistId,
+            cancellationToken);
+
+        return View(model);
     }
     private async Task PopulateEditListsAsync(UpdateMusicViewModel model, Guid? currentCategoryId, Guid? currentArtistId, CancellationToken cancellationToken)
     {
